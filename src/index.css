@@ -1,0 +1,1288 @@
+/* src/index.css */
+:root {
+  --bg-dark: #121214;
+  --bg-panel: #1d1d20;
+  --bg-card: #26262b;
+  --bg-hover: #323239;
+  --border-color: #383842;
+  --pr-accent: #9999ff; /* Premiere Pro 經典淺紫藍 */
+  --pr-accent-strong: #5c5ce0;
+  --text-main: #f0f0f5;
+  --text-muted: #9a9aa6;
+  --badge-essential: #e68a00;
+  --badge-ai: #00b894;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* 導覽列樣式 */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 2rem;
+  background-color: rgba(29, 29, 32, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text-main);
+  text-decoration: none;
+  .logo-word {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+}
+
+.pr-logo-box {
+  background: #00005b;
+  color: #9999ff;
+  border: 1px solid #9999ff;
+  font-weight: 800;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.nav-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  align-items: center;
+  margin: 0 3px;
+}
+
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  text-align: center;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--pr-accent);
+  font-weight: 600;
+}
+
+/* OS 切換按鈕 */
+.os-toggle {
+  display: flex;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.os-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.os-btn.active {
+  background: var(--pr-accent-strong);
+  color: #fff;
+}
+
+/* 容器與通用排版 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* 立體鍵盤按鍵元件 <Keybd /> */
+.keybd-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.keybd-key {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(180deg, #3a3a42 0%, #2a2a30 100%);
+  border: 1px solid #4e4e5a;
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  min-width: 2rem;
+  text-align: center;
+}
+
+.keybd-plus {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* 搜尋與篩選控制列 */
+.controls-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-panel);
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 260px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--pr-accent);
+}
+
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cat-tab {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.cat-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.cat-tab.active {
+  background: var(--pr-accent);
+  color: #121214;
+  border-color: var(--pr-accent);
+  font-weight: 700;
+}
+
+/* 快速鍵卡片網格 */
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1rem;
+}
+
+.shortcut-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+
+.shortcut-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--pr-accent);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.cmd-en {
+  font-size: 0.8rem;
+  color: var(--pr-accent);
+  font-family: monospace;
+  display: block;
+}
+
+.cmd-zh {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.badge-essential {
+  background: rgba(230, 138, 0, 0.18);
+  color: #ffb84d;
+  border: 1px solid rgba(230, 138, 0, 0.4);
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.pro-tip-box {
+  background: rgba(153, 153, 255, 0.08);
+  border-left: 3px solid var(--pr-accent);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  color: #d0d0e0;
+  border-radius: 0 6px 6px 0;
+}
+
+/* === 追加至 src/index.css 最下方 === */
+
+/* 1. 中英術語對照標籤 <BilingualTag /> */
+.bilingual-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(153, 153, 255, 0.12);
+  border: 1px solid rgba(153, 153, 255, 0.3);
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin: 0 0.2rem;
+}
+.bilingual-zh {
+  color: var(--text-main);
+  font-weight: 600;
+}
+.bilingual-en {
+  color: var(--pr-accent);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.8rem;
+}
+
+/* 2. Premiere Pro 2026 互動式模擬介面 (Workspace Mockup) */
+.pr-mockup-wrapper {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .pr-mockup-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pr-window {
+  background: #141417;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.pr-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1f1f24;
+  padding: 0.6rem 1rem;
+  border-bottom: 2px solid #121214;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pr-header-bar:hover,
+.pr-header-bar.selected {
+  background: #2b2b38;
+  outline: 2px solid var(--pr-accent);
+}
+
+.pr-workspace-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.75fr;
+  grid-template-rows: 170px 185px;
+  gap: 4px;
+  background: #0d0d0f;
+  padding: 4px;
+}
+
+.pr-panel-box {
+  background: var(--bg-panel);
+  border: 1px solid #2e2e36;
+  border-radius: 4px;
+  padding: 0.75rem;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pr-panel-box:hover {
+  background: #262630;
+  border-color: #6b6b8d;
+}
+
+.pr-panel-box.selected {
+  background: rgba(92, 92, 224, 0.16);
+  border: 2px solid var(--pr-accent);
+  box-shadow: inset 0 0 15px rgba(153, 153, 255, 0.15);
+}
+
+.panel-title-en {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--pr-accent);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* 熱點數字圓標 <UIHotspot /> */
+.ui-hotspot-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--pr-accent-strong);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 3px rgba(153, 153, 255, 0.25);
+  cursor: default;
+}
+
+/* 3. 虛擬鍵盤樣式 <VirtualKeyboard /> */
+.vk-container {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.vk-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.vk-key {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 0.6rem;
+  border-radius: 6px;
+  background: #26262c;
+  border: 1px solid #3d3d47;
+  border-bottom-width: 3px;
+  color: var(--text-muted);
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.vk-key.has-shortcut {
+  color: var(--text-main);
+  border-color: #5c5c77;
+  background: #2e2e38;
+}
+
+.vk-key.has-shortcut:hover,
+.vk-key.active {
+  background: var(--pr-accent-strong);
+  color: #fff;
+  border-color: var(--pr-accent);
+  transform: translateY(-2px);
+}
+
+.vk-key-hint {
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: var(--pr-accent);
+}
+.vk-key.active .vk-key-hint {
+  color: #fff;
+}
+
+/* 4. 快速鍵表格樣式 <ShortcutTable /> */
+.shortcut-table-wrap {
+  overflow-x: auto;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+.shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.shortcut-table th,
+.shortcut-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.shortcut-table th {
+  background: #18181b;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.shortcut-table tr:hover {
+  background: var(--bg-hover);
+}
+
+/* === 追加至 src/index.css 最下方（第三階段：教學與 AI 頁面樣式） === */
+
+/* 教學頁面：左側 Sidebar + 右側內容雙欄佈局 */
+.tutorials-layout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .tutorials-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tutorial-sidebar {
+  position: sticky;
+  top: 5rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.sidebar-group {
+  margin-bottom: 1.25rem;
+}
+
+.sidebar-group:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar-level-title {
+  font-size: 0.78rem;
+  font-family: monospace;
+  color: var(--pr-accent);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-item-btn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-item-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.sidebar-item-btn.active {
+  background: rgba(92, 92, 224, 0.2);
+  border-color: var(--pr-accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* 教學步驟卡片與視覺模擬框 */
+.step-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.step-number-badge {
+  display: inline-block;
+  background: var(--pr-accent-strong);
+  color: #fff;
+  font-family: monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+}
+
+.ui-diagram-box {
+  background: #141418;
+  border: 1px dashed #4e4e6a;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.85rem;
+  color: #c8c8e6;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+/* AI 工作流標籤 */
+.badge-ai-tag {
+  background: rgba(0, 184, 148, 0.15);
+  color: #00e6b8;
+  border: 1px solid rgba(0, 184, 148, 0.4);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+}
+
+/* === 共用頁面標題（由行內樣式統一至此） === */
+.page-title {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.page-desc {
+  color: var(--text-muted);
+}
+
+.section-title {
+  margin-bottom: 1.25rem;
+}
+
+/* === Home 首頁 === */
+.home-hero {
+  background: linear-gradient(135deg, #1d1d2b 0%, #16161d 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.home-hero-badge {
+  display: inline-block;
+  background: rgba(153, 153, 255, 0.15);
+  color: var(--pr-accent);
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.home-hero-title {
+  font-size: 2.4rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.home-hero-desc {
+  color: var(--text-muted);
+  max-width: 720px;
+  font-size: 1.05rem;
+  margin-bottom: 1.75rem;
+}
+
+.home-hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.home-hero-cta {
+  background: var(--pr-accent);
+  color: #121214;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-level-title {
+  margin: 0.4rem 0;
+}
+
+.home-level-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* === Sidebar 章節導覽 === */
+.sidebar-title {
+  margin-bottom: 1rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.sidebar-chapter-code {
+  font-family: monospace;
+  color: var(--pr-accent);
+  margin-right: 0.4rem;
+}
+
+/* === ShortcutTable 表格 === */
+.shortcut-name-cell {
+  font-weight: 700;
+  min-width: 180px;
+}
+
+.shortcut-essential-wrap {
+  margin-top: 0.25rem;
+}
+
+.shortcut-command-cell {
+  font-family: monospace;
+  color: var(--pr-accent);
+  min-width: 190px;
+}
+
+.shortcut-keys-cell {
+  min-width: 150px;
+}
+
+.shortcut-desc-cell {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.shortcut-protip {
+  color: #c4c4ff;
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+}
+
+/* === VirtualKeyboard 虛擬鍵盤 === */
+.vk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.vk-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--pr-accent);
+}
+
+.vk-clear-btn {
+  font-size: 0.78rem;
+}
+
+.vk-key-wide {
+  min-width: 240px;
+}
+
+/* === UIHotspot 熱點圓標狀態 === */
+.ui-hotspot-badge.clickable {
+  cursor: pointer;
+}
+
+.ui-hotspot-badge.active {
+  background: #ffb84d;
+  color: #121214;
+}
+
+/* === Keybd 按鍵組合 === */
+.keybd-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* === ShortcutsHub 快速鍵中心 === */
+.shortcuts-header {
+  margin-bottom: 1.25rem;
+}
+
+.essential-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.essential-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--pr-accent);
+}
+
+.essential-label {
+  font-weight: 600;
+  color: #ffb84d;
+}
+
+.search-result-count {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.card-keys {
+  margin: 0.85rem 0;
+}
+
+.card-description {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+/* === Tutorials 教學頁 === */
+.tutorials-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tutorials-title {
+  font-size: 2rem;
+  margin-bottom: 0.35rem;
+}
+
+.chapter-card {
+  border-top: 3px solid var(--pr-accent);
+}
+
+.chapter-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.chapter-meta-command {
+  font-size: 0.95rem;
+}
+
+.chapter-complete-btn {
+  border: 1px solid var(--border-color);
+}
+
+.chapter-title {
+  font-size: 1.65rem;
+  margin-bottom: 0.4rem;
+}
+
+.chapter-subtitle {
+  color: var(--pr-accent);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.chapter-summary {
+  color: #d0d0e0;
+  margin-bottom: 1.25rem;
+}
+
+.chapter-terms-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.chapter-terms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.step-uipath {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #ffb84d;
+}
+
+.step-title {
+  font-size: 1.25rem;
+  margin: 0.4rem 0 0.75rem;
+}
+
+.step-content {
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.step-shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.step-shortcut-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.chapter-practice-box {
+  padding: 1.25rem;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.chapter-practice-title {
+  color: #ffb84d;
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 1.05rem;
+}
+
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* === AIWorkflows 2026 AI 工作流頁 === */
+.ai-header {
+  margin-bottom: 1.75rem;
+}
+
+.ai-title {
+  font-size: 2.1rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.ai-demo-card {
+  border: 2px solid #00b894;
+  margin-bottom: 2rem;
+}
+
+.ai-demo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ai-demo-command {
+  color: #00e6b8;
+}
+
+.ai-demo-title {
+  font-size: 1.3rem;
+}
+
+.ai-demo-toggle {
+  background: #00b894;
+  color: #121214;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ai-demo-toggle.active {
+  background: #323239;
+  color: #fff;
+}
+
+.ai-transcript-box {
+  margin: 0;
+}
+
+.ai-transcript-label {
+  margin-bottom: 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.ai-transcript-text {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.ai-pause-mark {
+  background: rgba(255, 100, 100, 0.25);
+  color: #ff9999;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.ai-filler-mark {
+  background: rgba(255, 184, 77, 0.25);
+  color: #ffb84d;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.ai-transcript-text-clean {
+  color: #00e6b8;
+  font-weight: 600;
+}
+
+.ai-timeline-summary {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #2e2e3a;
+  font-size: 0.8rem;
+}
+
+.ai-feature-grid {
+  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+}
+
+.ai-feature-card {
+  padding: 1.5rem;
+}
+
+.ai-feature-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ai-feature-title {
+  font-size: 1.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.ai-feature-location {
+  font-size: 0.82rem;
+  color: #ffb84d;
+  font-family: monospace;
+  margin-bottom: 0.85rem;
+}
+
+.ai-feature-summary {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+.ai-steps-box {
+  background: #18181c;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.ai-steps-title {
+  font-size: 0.85rem;
+  color: #fff;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.ai-steps-list {
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  color: #d0d0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ai-terms-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.ai-terms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* === WorkspaceGuide 介面模擬頁 === */
+.workspace-header {
+  margin-bottom: 1.5rem;
+}
+
+.pr-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pr-header-mode {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.pr-header-mode-active {
+  color: var(--pr-accent);
+  font-weight: 800;
+  font-size: 0.85rem;
+  border-bottom: 2px solid var(--pr-accent);
+}
+
+.pr-header-workspaces {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.pr-source-placeholder {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: auto 0;
+}
+
+.pr-program-placeholder {
+  text-align: center;
+  color: #fff;
+  font-size: 0.85rem;
+  margin: auto 0;
+  font-weight: 600;
+}
+
+.pr-panel-footer {
+  font-size: 0.72rem;
+  color: #888;
+  display: flex;
+  justify-content: space-between;
+}
+
+.pr-panel-properties {
+  grid-row: span 2;
+}
+
+.pr-properties-list {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.pr-property-item {
+  background: #16161a;
+  padding: 0.4rem;
+  border-radius: 4px;
+}
+
+.pr-property-item-accent {
+  border-left: 2px solid var(--pr-accent);
+}
+
+.pr-property-title {
+  color: #fff;
+  display: block;
+}
+
+.pr-properties-caption {
+  font-size: 0.72rem;
+  color: var(--pr-accent);
+  text-align: center;
+}
+
+.pr-project-tree {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.pr-project-ai-search {
+  font-size: 0.7rem;
+  color: #00b894;
+}
+
+.pr-tools-timeline-row {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 4px;
+}
+
+.pr-panel-tools {
+  padding: 0.4rem;
+  align-items: center;
+}
+
+.pr-tools-list {
+  font-size: 0.75rem;
+  font-family: monospace;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.pr-timeline-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.7rem;
+  font-family: monospace;
+}
+
+.pr-track {
+  border-radius: 2px;
+  color: #fff;
+}
+
+.pr-track-v2 {
+  background: #3a4a7a;
+  padding: 2px 6px;
+}
+
+.pr-track-v1 {
+  background: #5c5ce0;
+  padding: 3px 6px;
+}
+
+.pr-track-a1 {
+  background: #266b54;
+  padding: 3px 6px;
+}
+
+.pr-track-a2 {
+  background: #1e5240;
+  padding: 2px 6px;
+  color: #b8e6d4;
+}
+
+.workspace-detail-card {
+  border: 2px solid var(--pr-accent);
+  padding: 1.75rem;
+}
+
+.workspace-detail-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.workspace-detail-command {
+  font-size: 0.95rem;
+}
+
+.workspace-detail-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.workspace-detail-summary {
+  color: #d0d0e0;
+  margin-bottom: 1.25rem;
+}
+
+.workspace-detail-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.workspace-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.workspace-shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.workspace-shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-dark);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.workspace-shortcut-label {
+  font-size: 0.9rem;
+}
+
+.workspace-tip {
+  font-size: 0.9rem;
+}
