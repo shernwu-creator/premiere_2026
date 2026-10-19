@@ -313,6 +313,7 @@ body {
 }
 
 .pr-window {
+  height: 80vh;
   background: #141417;
   border: 2px solid var(--border-color);
   border-radius: 12px;
@@ -1129,7 +1130,7 @@ body {
 }
 
 .pr-panel-properties {
-  grid-row: span 2;
+  grid-row: span 3;
 }
 
 .pr-properties-list {
@@ -1174,11 +1175,12 @@ body {
 
 .pr-tools-timeline-row {
   display: grid;
-  grid-template-columns: 48px 1fr;
+  grid-template-columns: 60px 1fr;
   gap: 4px;
 }
 
 .pr-panel-tools {
+  margin-bottom: auto;
   padding: 0.4rem;
   align-items: center;
 }

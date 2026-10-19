@@ -254,7 +254,6 @@ export default function WorkspaceGuide() {
               </div>
               <div className="pr-project-ai-search">🔍 AI Media Intelligence</div>
             </div>
-
             {/* 6 & 7. Tools + Timeline 複合區 */}
             <div className="pr-tools-timeline-row">
               {/* 6. Tools */}
