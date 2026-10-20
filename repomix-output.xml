@@ -40,17 +40,15 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
+.github/
+  workflows/
+    deploy.yml
 .vite-hooks/
   pre-commit
 public/
+  .nojekyll
   favicon.ico
-  favicon.svg
-  icons.svg
 src/
-  assets/
-    hero.png
-    typescript.svg
-    vite.svg
   components/
     layout/
       Navbar.jsx
@@ -88,47 +86,70 @@ vite.config.ts
 <files>
 This section contains the contents of the repository's files.
 
+<file path=".github/workflows/deploy.yml">
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # 第一次部署前，請先到 Settings → Pages → Build and deployment
+      # 將 Source 設為 "GitHub Actions"，否則 configure-pages 會失敗。
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      # setup-vp 會依 package.json / lockfile 安裝 Vite+、Node.js、pnpm 與專案依賴。
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@v1.21.2
+        with:
+          node-version: "24"
+          cache: true
+
+      - name: Build
+        run: vp run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+          # 預設會排除 dotfiles，需開啟才能帶上 public/.nojekyll
+          include-hidden-files: true
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+</file>
+
 <file path=".vite-hooks/pre-commit">
 vp staged
 </file>
 
-<file path="public/favicon.svg">
-<svg xmlns="http://www.w3.org/2000/svg" width="48" height="46" fill="none" viewBox="0 0 48 46"><path fill="#863bff" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" style="fill:#863bff;fill:color(display-p3 .5252 .23 1);fill-opacity:1"/><mask id="a" width="48" height="46" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M25.842 44.938c-.664.844-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.183c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.498 0-3.579-1.842-3.579H1.133c-.92 0-1.456-1.04-.92-1.787L9.91.473c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.578 1.842 3.578h11.377c.943 0 1.473 1.088.89 1.832L25.843 44.94z" style="fill:#000;fill-opacity:1"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#ede6ff" rx="5.508" ry="14.704" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -4.47 31.516)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#ede6ff" rx="10.399" ry="29.851" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -39.328 7.883)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#7e14ff" rx="5.508" ry="30.487" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -25.913 -14.639)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -32.644 -3.334)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -34.34 30.47)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#ede6ff" rx="14.072" ry="22.078" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="rotate(93.35 24.506 48.493)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx=".387" cy="8.972" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(39.51 .387 8.972)"/></g><g filter="url(#k)"><ellipse cx="47.523" cy="-6.092" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 47.523 -6.092)"/></g><g filter="url(#l)"><ellipse cx="41.412" cy="6.333" fill="#47bfff" rx="5.971" ry="9.665" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 41.412 6.333)"/></g><g filter="url(#m)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#n)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#o)"><ellipse cx="35.651" cy="29.907" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 35.651 29.907)"/></g><g filter="url(#p)"><ellipse cx="38.418" cy="32.4" fill="#47bfff" rx="5.971" ry="15.297" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 38.418 32.4)"/></g></g><defs><filter id="b" width="60.045" height="41.654" x="-19.77" y="16.149" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-54.613" y="-7.533" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-49.64" y="2.03" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-45.045" y="20.029" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-43.513" y="21.178" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="15.756" y="-17.901" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-27.636" y="-22.853" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="20.116" y="-38.415" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="24.641" y="-11.323" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="8.244" y="-2.416" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="18.713" y="10.588" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter></defs></svg>
-</file>
+<file path="public/.nojekyll">
 
-<file path="public/icons.svg">
-<svg xmlns="http://www.w3.org/2000/svg">
-  <symbol id="bluesky-icon" viewBox="0 0 16 17">
-    <g clip-path="url(#bluesky-clip)"><path fill="#08060d" d="M7.75 7.735c-.693-1.348-2.58-3.86-4.334-5.097-1.68-1.187-2.32-.981-2.74-.79C.188 2.065.1 2.812.1 3.251s.241 3.602.398 4.13c.52 1.744 2.367 2.333 4.07 2.145-2.495.37-4.71 1.278-1.805 4.512 3.196 3.309 4.38-.71 4.987-2.746.608 2.036 1.307 5.91 4.93 2.746 2.72-2.746.747-4.143-1.747-4.512 1.702.189 3.55-.4 4.07-2.145.156-.528.397-3.691.397-4.13s-.088-1.186-.575-1.406c-.42-.19-1.06-.395-2.741.79-1.755 1.24-3.64 3.752-4.334 5.099"/></g>
-    <defs><clipPath id="bluesky-clip"><path fill="#fff" d="M.1.85h15.3v15.3H.1z"/></clipPath></defs>
-  </symbol>
-  <symbol id="discord-icon" viewBox="0 0 20 19">
-    <path fill="#08060d" d="M16.224 3.768a14.5 14.5 0 0 0-3.67-1.153c-.158.286-.343.67-.47.976a13.5 13.5 0 0 0-4.067 0c-.128-.306-.317-.69-.476-.976A14.4 14.4 0 0 0 3.868 3.77C1.546 7.28.916 10.703 1.231 14.077a14.7 14.7 0 0 0 4.5 2.306q.545-.748.965-1.587a9.5 9.5 0 0 1-1.518-.74q.191-.14.372-.293c2.927 1.369 6.107 1.369 8.999 0q.183.152.372.294-.723.437-1.52.74.418.838.963 1.588a14.6 14.6 0 0 0 4.504-2.308c.37-3.911-.63-7.302-2.644-10.309m-9.13 8.234c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.894 0 1.614.82 1.599 1.82.001 1-.705 1.82-1.6 1.82m5.91 0c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.893 0 1.614.82 1.599 1.82 0 1-.706 1.82-1.6 1.82"/>
-  </symbol>
-  <symbol id="documentation-icon" viewBox="0 0 21 20">
-    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="m15.5 13.333 1.533 1.322c.645.555.967.833.967 1.178s-.322.623-.967 1.179L15.5 18.333m-3.333-5-1.534 1.322c-.644.555-.966.833-.966 1.178s.322.623.966 1.179l1.534 1.321"/>
-    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M17.167 10.836v-4.32c0-1.41 0-2.117-.224-2.68-.359-.906-1.118-1.621-2.08-1.96-.599-.21-1.349-.21-2.848-.21-2.623 0-3.935 0-4.983.369-1.684.591-3.013 1.842-3.641 3.428C3 6.449 3 7.684 3 10.154v2.122c0 2.558 0 3.838.706 4.726q.306.383.713.671c.76.536 1.79.64 3.581.66"/>
-    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M3 10a2.78 2.78 0 0 1 2.778-2.778c.555 0 1.209.097 1.748-.047.48-.129.854-.503.982-.982.145-.54.048-1.194.048-1.749a2.78 2.78 0 0 1 2.777-2.777"/>
-  </symbol>
-  <symbol id="github-icon" viewBox="0 0 19 19">
-    <path fill="#08060d" fill-rule="evenodd" d="M9.356 1.85C5.05 1.85 1.57 5.356 1.57 9.694a7.84 7.84 0 0 0 5.324 7.44c.387.079.528-.168.528-.376 0-.182-.013-.805-.013-1.454-2.165.467-2.616-.935-2.616-.935-.349-.91-.864-1.143-.864-1.143-.71-.48.051-.48.051-.48.787.051 1.2.805 1.2.805.695 1.194 1.817.857 2.268.649.064-.507.27-.857.49-1.052-1.728-.182-3.545-.857-3.545-3.87 0-.857.31-1.558.8-2.104-.078-.195-.349-1 .077-2.078 0 0 .657-.208 2.14.805a7.5 7.5 0 0 1 1.946-.26c.657 0 1.328.092 1.946.26 1.483-1.013 2.14-.805 2.14-.805.426 1.078.155 1.883.078 2.078.502.546.799 1.247.799 2.104 0 3.013-1.818 3.675-3.558 3.87.284.247.528.714.528 1.454 0 1.052-.012 1.896-.012 2.156 0 .208.142.455.528.377a7.84 7.84 0 0 0 5.324-7.441c.013-4.338-3.48-7.844-7.773-7.844" clip-rule="evenodd"/>
-  </symbol>
-  <symbol id="social-icon" viewBox="0 0 20 20">
-    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M12.5 6.667a4.167 4.167 0 1 0-8.334 0 4.167 4.167 0 0 0 8.334 0"/>
-    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M2.5 16.667a5.833 5.833 0 0 1 8.75-5.053m3.837.474.513 1.035c.07.144.257.282.414.309l.93.155c.596.1.736.536.307.965l-.723.73a.64.64 0 0 0-.152.531l.207.903c.164.715-.213.991-.84.618l-.872-.52a.63.63 0 0 0-.577 0l-.872.52c-.624.373-1.003.094-.84-.618l.207-.903a.64.64 0 0 0-.152-.532l-.723-.729c-.426-.43-.289-.864.306-.964l.93-.156a.64.64 0 0 0 .412-.31l.513-1.034c.28-.562.735-.562 1.012 0"/>
-  </symbol>
-  <symbol id="x-icon" viewBox="0 0 19 19">
-    <path fill="#08060d" fill-rule="evenodd" d="M1.893 1.98c.052.072 1.245 1.769 2.653 3.77l2.892 4.114c.183.261.333.48.333.486s-.068.089-.152.183l-.522.593-.765.867-3.597 4.087c-.375.426-.734.834-.798.905a1 1 0 0 0-.118.148c0 .01.236.017.664.017h.663l.729-.83c.4-.457.796-.906.879-.999a692 692 0 0 0 1.794-2.038c.034-.037.301-.34.594-.675l.551-.624.345-.392a7 7 0 0 1 .34-.374c.006 0 .93 1.306 2.052 2.903l2.084 2.965.045.063h2.275c1.87 0 2.273-.003 2.266-.021-.008-.02-1.098-1.572-3.894-5.547-2.013-2.862-2.28-3.246-2.273-3.266.008-.019.282-.332 2.085-2.38l2-2.274 1.567-1.782c.022-.028-.016-.03-.65-.03h-.674l-.3.342a871 871 0 0 1-1.782 2.025c-.067.075-.405.458-.75.852a100 100 0 0 1-.803.91c-.148.172-.299.344-.99 1.127-.304.343-.32.358-.345.327-.015-.019-.904-1.282-1.976-2.808L6.365 1.85H1.8zm1.782.91 8.078 11.294c.772 1.08 1.413 1.973 1.425 1.984.016.017.241.02 1.05.017l1.03-.004-2.694-3.766L7.796 5.75 5.722 2.852l-1.039-.004-1.039-.004z" clip-rule="evenodd"/>
-  </symbol>
-</svg>
-</file>
-
-<file path="src/assets/typescript.svg">
-<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="32" height="32" viewBox="0 0 256 256"><path fill="#007ACC" d="M0 128v128h256V0H0z"/><path fill="#FFF" d="m56.612 128.85l-.081 10.483h33.32v94.68h23.568v-94.68h33.321v-10.28c0-5.69-.122-10.444-.284-10.566c-.122-.162-20.4-.244-44.983-.203l-44.74.122l-.121 10.443Zm149.955-10.742c6.501 1.625 11.459 4.51 16.01 9.224c2.357 2.52 5.851 7.111 6.136 8.208c.08.325-11.053 7.802-17.798 11.988c-.244.162-1.22-.894-2.317-2.52c-3.291-4.795-6.745-6.867-12.028-7.233c-7.76-.528-12.759 3.535-12.718 10.321c0 1.992.284 3.17 1.097 4.795c1.707 3.536 4.876 5.649 14.832 9.956c18.326 7.883 26.168 13.084 31.045 20.48c5.445 8.249 6.664 21.415 2.966 31.208c-4.063 10.646-14.14 17.879-28.323 20.276c-4.388.772-14.79.65-19.504-.203c-10.28-1.828-20.033-6.908-26.047-13.572c-2.357-2.6-6.949-9.387-6.664-9.874c.122-.163 1.178-.813 2.356-1.504c1.138-.65 5.446-3.129 9.509-5.485l7.355-4.267l1.544 2.276c2.154 3.29 6.867 7.801 9.712 9.305c8.167 4.307 19.383 3.698 24.909-1.26c2.357-2.153 3.332-4.388 3.332-7.68c0-2.966-.366-4.266-1.91-6.501c-1.99-2.845-6.054-5.242-17.595-10.24c-13.206-5.69-18.895-9.224-24.096-14.832c-3.007-3.25-5.852-8.452-7.03-12.8c-.975-3.617-1.22-12.678-.447-16.335c2.723-12.76 12.353-21.659 26.25-24.3c4.51-.853 14.994-.528 19.424.569Z"/></svg>
-</file>
-
-<file path="src/assets/vite.svg">
-<svg xmlns="http://www.w3.org/2000/svg" width="77" height="47" fill="none" aria-labelledby="vite-logo-title" viewBox="0 0 77 47"><title id="vite-logo-title">Vite</title><style>.parenthesis{fill:#000}@media (prefers-color-scheme:dark){.parenthesis{fill:#fff}}</style><path fill="#9135ff" d="M40.151 45.71c-.663.844-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.493c-.92 0-1.457-1.04-.92-1.788l7.479-10.471c1.07-1.498 0-3.578-1.842-3.578H15.443c-.92 0-1.456-1.04-.92-1.788l9.696-13.576c.213-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.472c-1.07 1.497 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.087.89 1.83L40.153 45.712z"/><mask id="a" width="48" height="47" x="14" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M40.047 45.71c-.663.843-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.389c-.92 0-1.457-1.04-.92-1.788l7.479-10.472c1.07-1.497 0-3.578-1.842-3.578H15.34c-.92 0-1.456-1.04-.92-1.788l9.696-13.575c.213-.297.556-.474.92-.474H53.93c.92 0 1.456 1.04.92 1.788L47.37 13.03c-1.07 1.498 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.088.89 1.831L40.049 45.712z"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#eee6ff" rx="5.508" ry="14.704" transform="rotate(269.814 20.96 11.29)scale(-1 1)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#eee6ff" rx="10.399" ry="29.851" transform="rotate(89.814 -16.902 -8.275)scale(1 -1)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#8900ff" rx="5.508" ry="30.487" transform="rotate(89.814 -19.197 -7.127)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.928 4.177)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.738 5.52)scale(1 -1)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#eee6ff" rx="14.072" ry="22.078" transform="rotate(93.35 31.245 55.578)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx="14.592" cy="9.743" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(39.51 14.592 9.743)"/></g><g filter="url(#k)"><ellipse cx="61.728" cy="-5.321" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 61.728 -5.32)"/></g><g filter="url(#l)"><ellipse cx="55.618" cy="7.104" fill="#00c2ff" rx="5.971" ry="9.665" transform="rotate(37.892 55.618 7.104)"/></g><g filter="url(#m)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#n)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#o)"><ellipse cx="49.857" cy="30.678" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 49.857 30.678)"/></g><g filter="url(#p)"><ellipse cx="52.623" cy="33.171" fill="#00c2ff" rx="5.971" ry="15.297" transform="rotate(37.892 52.623 33.17)"/></g></g><path d="M6.919 0c-9.198 13.166-9.252 33.575 0 46.789h6.215c-9.25-13.214-9.196-33.623 0-46.789zm62.424 0h-6.215c9.198 13.166 9.252 33.575 0 46.789h6.215c9.25-13.214 9.196-33.623 0-46.789" class="parenthesis"/><defs><filter id="b" width="60.045" height="41.654" x="-5.564" y="16.92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-40.407" y="-6.762" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-35.435" y="2.801" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-30.84" y="20.8" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-29.307" y="21.949" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="29.961" y="-17.13" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-13.43" y="-22.082" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="34.321" y="-37.644" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="38.847" y="-10.552" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="22.45" y="-1.645" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="32.919" y="11.36" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter></defs></svg>
 </file>
 
 <file path="src/components/layout/Navbar.jsx">
@@ -151,31 +172,36 @@ export default function Navbar() {
 
       <nav className="nav-links">
         <NavLink to="/" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
-          學習地圖 (Home)
+          學習地圖 <br />
+          (Home)
         </NavLink>
         <NavLink
           to="/workspace"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
         >
-          2026 介面解析 (UI)
+          2026 介面解析 <br />
+          (UI)
         </NavLink>
         <NavLink
           to="/tutorials"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
         >
-          圖文教學 (Tutorials)
+          圖文教學 <br />
+          (Tutorials)
         </NavLink>
         <NavLink
           to="/shortcuts"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
         >
-          快速鍵大全 (Shortcuts)
+          快速鍵大全 <br />
+          (Shortcuts)
         </NavLink>
         <NavLink
           to="/ai-workflows"
           className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
         >
-          AI 工作流 (AI)
+          AI 工作流 <br />
+          (AI)
         </NavLink>
       </nav>
 
@@ -194,14 +220,12 @@ export default function Navbar() {
 
 <file path="src/components/layout/Sidebar.jsx">
 // src/components/layout/Sidebar.jsx
-import { TUTORIAL_LEVELS } from '../../data/tutorialsData';
+import { TUTORIAL_LEVELS } from "../../data/tutorialsData";
 
 export default function Sidebar({ chapters = [], activeChapterId, onSelectChapter }) {
   return (
     <aside className="tutorial-sidebar">
-      <div style={{ marginBottom: '1rem', fontWeight: 800, fontSize: '1.05rem' }}>
-        📚 系統化章節導覽
-      </div>
+      <div className="sidebar-title">📚 系統化章節導覽</div>
 
       {TUTORIAL_LEVELS.map((level) => {
         const levelChapters = chapters.filter((ch) => ch.level === level.id);
@@ -212,13 +236,11 @@ export default function Sidebar({ chapters = [], activeChapterId, onSelectChapte
               <button
                 key={ch.id}
                 type="button"
-                className={`sidebar-item-btn ${activeChapterId === ch.id ? 'active' : ''}`}
+                className={`sidebar-item-btn ${activeChapterId === ch.id ? "active" : ""}`}
                 onClick={() => onSelectChapter(ch.id)}
               >
-                <span style={{ fontFamily: 'monospace', color: 'var(--pr-accent)', marginRight: '0.4rem' }}>
-                  {ch.chapterCode}
-                </span>
-                {ch.title.split('：')[0]}
+                <span className="sidebar-chapter-code">{ch.chapterCode}</span>
+                {ch.title.split("：")[0]}
               </button>
             ))}
           </div>
@@ -231,7 +253,7 @@ export default function Sidebar({ chapters = [], activeChapterId, onSelectChapte
 
 <file path="src/components/shortcuts/ShortcutTable.jsx">
 // src/components/shortcuts/ShortcutTable.jsx
-import Keybd from '../ui/Keybd';
+import Keybd from "../ui/Keybd";
 
 export default function ShortcutTable({ items = [] }) {
   return (
@@ -248,27 +270,21 @@ export default function ShortcutTable({ items = [] }) {
         <tbody>
           {items.map((item) => (
             <tr key={item.id}>
-              <td style={{ fontWeight: 700, minWidth: '180px' }}>
+              <td className="shortcut-name-cell">
                 {item.nameZh}
                 {item.essential && (
-                  <div style={{ marginTop: '0.25rem' }}>
+                  <div className="shortcut-essential-wrap">
                     <span className="badge-essential">★ 必背</span>
                   </div>
                 )}
               </td>
-              <td style={{ fontFamily: 'monospace', color: 'var(--pr-accent)', minWidth: '190px' }}>
-                {item.commandEn}
-              </td>
-              <td style={{ minWidth: '150px' }}>
+              <td className="shortcut-command-cell">{item.commandEn}</td>
+              <td className="shortcut-keys-cell">
                 <Keybd winKeys={item.winKeys} macKeys={item.macKeys} />
               </td>
-              <td style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+              <td className="shortcut-desc-cell">
                 <div>{item.description}</div>
-                {item.proTip && (
-                  <div style={{ color: '#c4c4ff', marginTop: '0.3rem', fontSize: '0.82rem' }}>
-                    💡 {item.proTip}
-                  </div>
-                )}
+                {item.proTip && <div className="shortcut-protip">💡 {item.proTip}</div>}
               </td>
             </tr>
           ))}
@@ -338,31 +354,12 @@ const KEYBOARD_ROWS = [
 export default function VirtualKeyboard({ activeKey = "", onSelectKey }) {
   return (
     <div className="vk-container">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "0.85rem",
-          flexWrap: "wrap",
-          gap: "0.5rem",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "0.9rem",
-            fontWeight: 700,
-            color: "var(--pr-accent)",
-          }}
-        >
+      <div className="vk-header">
+        <span className="vk-title">
           ⌨️ 視覺化剪輯鍵盤（點擊發亮按鍵可快速篩選功能，再點一次取消）
         </span>
         {activeKey && (
-          <button
-            className="os-btn active"
-            onClick={() => onSelectKey("")}
-            style={{ fontSize: "0.78rem" }}
-          >
+          <button className="os-btn active vk-clear-btn" onClick={() => onSelectKey("")}>
             ✕ 清除按鍵篩選 ({activeKey})
           </button>
         )}
@@ -376,8 +373,7 @@ export default function VirtualKeyboard({ activeKey = "", onSelectKey }) {
               <button
                 key={item.key}
                 type="button"
-                className={`vk-key ${item.hint ? "has-shortcut" : ""} ${isSelected ? "active" : ""}`}
-                style={item.wide ? { minWidth: "240px" } : {}}
+                className={`vk-key ${item.hint ? "has-shortcut" : ""} ${isSelected ? "active" : ""} ${item.wide ? "vk-key-wide" : ""}`}
                 onClick={() => onSelectKey(isSelected ? "" : item.key)}
               >
                 <span>{item.key}</span>
@@ -406,16 +402,16 @@ export default function BilingualTag({ zh, en }) {
 
 <file path="src/components/ui/Keybd.jsx">
 // src/components/ui/Keybd.jsx
-import { useOS } from '../../context/OSContext';
+import { useOS } from "../../context/OSContext";
 
 export default function Keybd({ winKeys = [], macKeys = [] }) {
   const { os } = useOS();
-  const keysToRender = os === 'mac' ? macKeys : winKeys;
+  const keysToRender = os === "mac" ? macKeys : winKeys;
 
   return (
     <span className="keybd-group">
       {keysToRender.map((key, index) => (
-        <span key={index} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+        <span key={index} className="keybd-combo">
           <kbd className="keybd-key">{key}</kbd>
           {index < keysToRender.length - 1 && <span className="keybd-plus">+</span>}
         </span>
@@ -432,12 +428,7 @@ export default function UIHotspot({ number, label, active = false, onClick }) {
     <span
       onClick={onClick}
       title={label}
-      className="ui-hotspot-badge"
-      style={{
-        background: active ? '#ffb84d' : 'var(--pr-accent-strong)',
-        color: active ? '#121214' : '#fff',
-        cursor: onClick ? 'pointer' : 'default'
-      }}
+      className={`ui-hotspot-badge${active ? " active" : ""}${onClick ? " clickable" : ""}`}
     >
       {number}
     </span>
@@ -447,26 +438,22 @@ export default function UIHotspot({ number, label, active = false, onClick }) {
 
 <file path="src/context/OSContext.jsx">
 // src/context/OSContext.jsx
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
 
 const OSContext = createContext();
 
 export function OSProvider({ children }) {
   const [os, setOs] = useState(() => {
-    const saved = localStorage.getItem('pr_guide_os');
+    const saved = localStorage.getItem("pr_guide_os");
     if (saved) return saved;
-    return navigator.platform.toUpperCase().indexOf('MAC') >= 0 ? 'mac' : 'win';
+    return navigator.platform.toUpperCase().indexOf("MAC") >= 0 ? "mac" : "win";
   });
 
   useEffect(() => {
-    localStorage.setItem('pr_guide_os', os);
+    localStorage.setItem("pr_guide_os", os);
   }, [os]);
 
-  return (
-    <OSContext.Provider value={{ os, setOs }}>
-      {children}
-    </OSContext.Provider>
-  );
+  return <OSContext.Provider value={{ os, setOs }}>{children}</OSContext.Provider>;
 }
 
 export function useOS() {
@@ -478,346 +465,358 @@ export function useOS() {
 // src/data/shortcutsData.js
 
 export const SHORTCUT_CATEGORIES = [
-  { id: 'all', name: '全部指令 (All)' },
-  { id: 'tools', name: '工具箱 (Tools)' },
-  { id: 'timeline', name: '時間軸與極速粗剪 (Timeline & Trim)' },
-  { id: 'playback', name: '播放與導覽 (Playback & JKL)' },
-  { id: 'markers', name: '標記與三點剪輯 (Markers & 3-Point)' },
-  { id: 'text_ai', name: '字幕、特效與 2026 新功能 (Text & AI)' },
-  { id: 'project', name: '專案與視窗管理 (Project & UI)' },
+  { id: "all", name: "全部指令 (All)" },
+  { id: "tools", name: "工具箱 (Tools)" },
+  { id: "timeline", name: "時間軸與極速粗剪 (Timeline & Trim)" },
+  { id: "playback", name: "播放與導覽 (Playback & JKL)" },
+  { id: "markers", name: "標記與三點剪輯 (Markers & 3-Point)" },
+  { id: "text_ai", name: "字幕、特效與 2026 新功能 (Text & AI)" },
+  { id: "project", name: "專案與視窗管理 (Project & UI)" },
 ];
 
 export const SHORTCUTS_DATA = [
   // === 1. 工具箱 (Tools) ===
   {
-    id: 'tool-selection',
-    category: 'tools',
-    commandEn: 'Selection Tool',
-    nameZh: '選取工具（最常用預設工具）',
-    winKeys: ['V'],
-    macKeys: ['V'],
+    id: "tool-selection",
+    category: "tools",
+    commandEn: "Selection Tool",
+    nameZh: "選取工具（最常用預設工具）",
+    winKeys: ["V"],
+    macKeys: ["V"],
     essential: true,
-    description: '用於選取、移動時間軸上的片段（Clips），或在 Properties 面板中調整屬性。',
-    proTip: '剪輯時左手食指應隨時準備按 V 回到選取狀態，避免誤切片段。'
+    description: "用於選取、移動時間軸上的片段（Clips），或在 Properties 面板中調整屬性。",
+    proTip: "剪輯時左手食指應隨時準備按 V 回到選取狀態，避免誤切片段。",
   },
   {
-    id: 'tool-razor',
-    category: 'tools',
-    commandEn: 'Razor Tool',
-    nameZh: '剃刀工具（切割片段）',
-    winKeys: ['C'],
-    macKeys: ['C'],
+    id: "tool-razor",
+    category: "tools",
+    commandEn: "Razor Tool",
+    nameZh: "剃刀工具（切割片段）",
+    winKeys: ["C"],
+    macKeys: ["C"],
     essential: true,
-    description: '將滑鼠游標變成刀片，在時間軸點擊處直接切開影片或音訊。',
-    proTip: '進階剪輯師通常不按 C 切換剃刀，而是直接用「Add Edit (Ctrl/Cmd + K)」在播放頭位置一鍵切開！'
+    description: "將滑鼠游標變成刀片，在時間軸點擊處直接切開影片或音訊。",
+    proTip:
+      "進階剪輯師通常不按 C 切換剃刀，而是直接用「Add Edit (Ctrl/Cmd + K)」在播放頭位置一鍵切開！",
   },
   {
-    id: 'tool-track-forward',
-    category: 'tools',
-    commandEn: 'Track Select Forward Tool',
-    nameZh: '向後選取軌道工具',
-    winKeys: ['A'],
-    macKeys: ['A'],
+    id: "tool-track-forward",
+    category: "tools",
+    commandEn: "Track Select Forward Tool",
+    nameZh: "向後選取軌道工具",
+    winKeys: ["A"],
+    macKeys: ["A"],
     essential: true,
-    description: '一次選取游標後方所有軌道上的全部片段，方便整體往後挪出空位。',
-    proTip: '按住 Shift + A 可以變成「只選取單一軌道」向後的所有片段。'
+    description: "一次選取游標後方所有軌道上的全部片段，方便整體往後挪出空位。",
+    proTip: "按住 Shift + A 可以變成「只選取單一軌道」向後的所有片段。",
   },
   {
-    id: 'tool-ripple-edit',
-    category: 'tools',
-    commandEn: 'Ripple Edit Tool',
-    nameZh: '波紋編輯工具',
-    winKeys: ['B'],
-    macKeys: ['B'],
+    id: "tool-ripple-edit",
+    category: "tools",
+    commandEn: "Ripple Edit Tool",
+    nameZh: "波紋編輯工具",
+    winKeys: ["B"],
+    macKeys: ["B"],
     essential: false,
-    description: '拉動片段邊緣修剪長度的同時，後方片段會自動往前貼齊，不留黑畫面空隙。',
-    proTip: '在 2026 版中，若要使用 AI Generative Extend（生成式延展），則是選取旁邊的專屬延展工具拉動邊緣。'
+    description: "拉動片段邊緣修剪長度的同時，後方片段會自動往前貼齊，不留黑畫面空隙。",
+    proTip:
+      "在 2026 版中，若要使用 AI Generative Extend（生成式延展），則是選取旁邊的專屬延展工具拉動邊緣。",
   },
   {
-    id: 'tool-slip',
-    category: 'tools',
-    commandEn: 'Slip Tool',
-    nameZh: '滑動工具（改變內容不改長度）',
-    winKeys: ['Y'],
-    macKeys: ['Y'],
+    id: "tool-slip",
+    category: "tools",
+    commandEn: "Slip Tool",
+    nameZh: "滑動工具（改變內容不改長度）",
+    winKeys: ["Y"],
+    macKeys: ["Y"],
     essential: false,
-    description: '保持時間軸上片段的總長度與位置不變，但左右拖曳改變片段內部顯示的「入點與出點畫面」。',
-    proTip: '當你已經對好音樂節拍，只想微調該卡點出現的動作瞬間時，Y 鍵是神技！'
+    description:
+      "保持時間軸上片段的總長度與位置不變，但左右拖曳改變片段內部顯示的「入點與出點畫面」。",
+    proTip: "當你已經對好音樂節拍，只想微調該卡點出現的動作瞬間時，Y 鍵是神技！",
   },
   {
-    id: 'tool-hand',
-    category: 'tools',
-    commandEn: 'Hand Tool',
-    nameZh: '手形工具（平移時間軸/畫面）',
-    winKeys: ['H'],
-    macKeys: ['H'],
+    id: "tool-hand",
+    category: "tools",
+    commandEn: "Hand Tool",
+    nameZh: "手形工具（平移時間軸/畫面）",
+    winKeys: ["H"],
+    macKeys: ["H"],
     essential: false,
-    description: '拖曳平移時間軸視野，或在放大 Program Monitor 預覽畫面時移動檢視區域。',
-    proTip: '在 2026 版中，也可直接按住滑鼠中鍵（滾輪）拖曳時間軸。'
+    description: "拖曳平移時間軸視野，或在放大 Program Monitor 預覽畫面時移動檢視區域。",
+    proTip: "在 2026 版中，也可直接按住滑鼠中鍵（滾輪）拖曳時間軸。",
   },
   {
-    id: 'tool-type',
-    category: 'tools',
-    commandEn: 'Type Tool',
-    nameZh: '文字工具',
-    winKeys: ['Ctrl', 'T'],
-    macKeys: ['Cmd', 'T'],
+    id: "tool-type",
+    category: "tools",
+    commandEn: "Type Tool",
+    nameZh: "文字工具",
+    winKeys: ["Ctrl", "T"],
+    macKeys: ["Cmd", "T"],
     essential: true,
-    description: '直接在 Program Monitor 畫面上建立新文字圖層（Graphic Text），並連動 2026 Properties 面板調整字型。',
-    proTip: '純按 T 是進入文字編輯模式，而 Ctrl/Cmd + T 可以直接新增一組標題圖層。'
+    description:
+      "直接在 Program Monitor 畫面上建立新文字圖層（Graphic Text），並連動 2026 Properties 面板調整字型。",
+    proTip: "純按 T 是進入文字編輯模式，而 Ctrl/Cmd + T 可以直接新增一組標題圖層。",
   },
 
   // === 2. 時間軸與極速粗剪 (Timeline & Trim) ===
   {
-    id: 'tl-add-edit',
-    category: 'timeline',
-    commandEn: 'Add Edit',
-    nameZh: '在播放頭位置切一刀',
-    winKeys: ['Ctrl', 'K'],
-    macKeys: ['Cmd', 'K'],
+    id: "tl-add-edit",
+    category: "timeline",
+    commandEn: "Add Edit",
+    nameZh: "在播放頭位置切一刀",
+    winKeys: ["Ctrl", "K"],
+    macKeys: ["Cmd", "K"],
     essential: true,
-    description: '不必切換剃刀工具 (C)，直接在藍線播放頭（Playhead）所在的軌道切開片段。',
-    proTip: '可至 Edit > Keyboard Shortcuts 將此指令改設為單鍵「E」或「S」，剪輯速度直接翻倍！'
+    description: "不必切換剃刀工具 (C)，直接在藍線播放頭（Playhead）所在的軌道切開片段。",
+    proTip: "可至 Edit > Keyboard Shortcuts 將此指令改設為單鍵「E」或「S」，剪輯速度直接翻倍！",
   },
   {
-    id: 'tl-ripple-trim-prev',
-    category: 'timeline',
-    commandEn: 'Ripple Trim Previous Edit to Playhead',
-    nameZh: '波紋修剪：砍掉片段前半段並自動貼齊',
-    winKeys: ['Q'],
-    macKeys: ['Q'],
+    id: "tl-ripple-trim-prev",
+    category: "timeline",
+    commandEn: "Ripple Trim Previous Edit to Playhead",
+    nameZh: "波紋修剪：砍掉片段前半段並自動貼齊",
+    winKeys: ["Q"],
+    macKeys: ["Q"],
     essential: true,
-    description: '將目前播放頭「左邊（到上一個切點為止）」的多餘畫面直接刪除，且後方片段自動往前補齊。',
-    proTip: '【黃金左手神技】搭配 W 鍵使用，連切帶刪只需一顆按鍵，不留黑格，是 YouTuber 粗剪必學第一名！'
+    description:
+      "將目前播放頭「左邊（到上一個切點為止）」的多餘畫面直接刪除，且後方片段自動往前補齊。",
+    proTip:
+      "【黃金左手神技】搭配 W 鍵使用，連切帶刪只需一顆按鍵，不留黑格，是 YouTuber 粗剪必學第一名！",
   },
   {
-    id: 'tl-ripple-trim-next',
-    category: 'timeline',
-    commandEn: 'Ripple Trim Next Edit to Playhead',
-    nameZh: '波紋修剪：砍掉片段後半段並自動貼齊',
-    winKeys: ['W'],
-    macKeys: ['W'],
+    id: "tl-ripple-trim-next",
+    category: "timeline",
+    commandEn: "Ripple Trim Next Edit to Playhead",
+    nameZh: "波紋修剪：砍掉片段後半段並自動貼齊",
+    winKeys: ["W"],
+    macKeys: ["W"],
     essential: true,
-    description: '將目前播放頭「右邊（到下一個切點為止）」的畫面直接刪除，後方片段自動往前貼齊。',
-    proTip: '看毛片時：播放到講完話瞬間 → 直接按 W，後面廢話直接消失並接上下一段！'
+    description: "將目前播放頭「右邊（到下一個切點為止）」的畫面直接刪除，後方片段自動往前貼齊。",
+    proTip: "看毛片時：播放到講完話瞬間 → 直接按 W，後面廢話直接消失並接上下一段！",
   },
   {
-    id: 'tl-ripple-delete',
-    category: 'timeline',
-    commandEn: 'Ripple Delete',
-    nameZh: '波紋刪除（刪除並消除空隙）',
-    winKeys: ['Shift', 'Delete'],
-    macKeys: ['Shift', 'Forward Delete'],
+    id: "tl-ripple-delete",
+    category: "timeline",
+    commandEn: "Ripple Delete",
+    nameZh: "波紋刪除（刪除並消除空隙）",
+    winKeys: ["Shift", "Delete"],
+    macKeys: ["Shift", "Forward Delete"],
     essential: true,
-    description: '刪除選取的片段，並自動讓後方的所有片段往前遞補，不會留下黑色空白區間。',
-    proTip: '一般按 Delete 稱為 Lift（只挖空不補齊）；加 Shift 才會自動吸附補齊。'
+    description: "刪除選取的片段，並自動讓後方的所有片段往前遞補，不會留下黑色空白區間。",
+    proTip: "一般按 Delete 稱為 Lift（只挖空不補齊）；加 Shift 才會自動吸附補齊。",
   },
   {
-    id: 'tl-select-at-playhead',
-    category: 'timeline',
-    commandEn: 'Select Clip at Playhead',
-    nameZh: '選取播放頭所在的片段',
-    winKeys: ['D'],
-    macKeys: ['D'],
+    id: "tl-select-at-playhead",
+    category: "timeline",
+    commandEn: "Select Clip at Playhead",
+    nameZh: "選取播放頭所在的片段",
+    winKeys: ["D"],
+    macKeys: ["D"],
     essential: true,
-    description: '不用動滑鼠去點時間軸，直接選取目前藍線（Playhead）壓住的片段。',
-    proTip: '按 D 選取片段後，2026 的 Properties Panel 會立刻顯示該片段的縮放與音訊參數。'
+    description: "不用動滑鼠去點時間軸，直接選取目前藍線（Playhead）壓住的片段。",
+    proTip: "按 D 選取片段後，2026 的 Properties Panel 會立刻顯示該片段的縮放與音訊參數。",
   },
   {
-    id: 'tl-zoom',
-    category: 'timeline',
-    commandEn: 'Zoom In / Out Timeline',
-    nameZh: '放大 / 縮小時間軸刻度',
-    winKeys: ['=', '-'],
-    macKeys: ['=', '-'],
+    id: "tl-zoom",
+    category: "timeline",
+    commandEn: "Zoom In / Out Timeline",
+    nameZh: "放大 / 縮小時間軸刻度",
+    winKeys: ["=", "-"],
+    macKeys: ["=", "-"],
     essential: true,
-    description: '按 = 放大時間軸看清楚音訊波形細節；按 - 縮小時間軸看整體影片結構。',
-    proTip: '搭配「\\ (反斜線)」鍵：一鍵讓整支影片完整縮放塞滿時間軸視窗 (Zoom to Sequence)！'
+    description: "按 = 放大時間軸看清楚音訊波形細節；按 - 縮小時間軸看整體影片結構。",
+    proTip: "搭配「\\ (反斜線)」鍵：一鍵讓整支影片完整縮放塞滿時間軸視窗 (Zoom to Sequence)！",
   },
   {
-    id: 'tl-zoom-sequence',
-    category: 'timeline',
-    commandEn: 'Zoom to Sequence',
-    nameZh: '全覽整條時間軸',
-    winKeys: ['\\'],
-    macKeys: ['\\'],
+    id: "tl-zoom-sequence",
+    category: "timeline",
+    commandEn: "Zoom to Sequence",
+    nameZh: "全覽整條時間軸",
+    winKeys: ["\\"],
+    macKeys: ["\\"],
     essential: true,
-    description: '無論時間軸放大到多細，按一下「\\」立刻縮放回能看見整部影片頭尾的最佳比例。',
-    proTip: '找片尾或檢查總片長時必按。'
+    description: "無論時間軸放大到多細，按一下「\\」立刻縮放回能看見整部影片頭尾的最佳比例。",
+    proTip: "找片尾或檢查總片長時必按。",
   },
   {
-    id: 'tl-speed',
-    category: 'timeline',
-    commandEn: 'Speed / Duration',
-    nameZh: '調整片段速度與時間長度',
-    winKeys: ['Ctrl', 'R'],
-    macKeys: ['Cmd', 'R'],
+    id: "tl-speed",
+    category: "timeline",
+    commandEn: "Speed / Duration",
+    nameZh: "調整片段速度與時間長度",
+    winKeys: ["Ctrl", "R"],
+    macKeys: ["Cmd", "R"],
     essential: false,
-    description: '開啟速度設定視窗，製作快轉 (200%)、慢動作 (50%) 或倒放 (Reverse Speed)。',
-    proTip: '做慢動作時，記得把 Time Interpolation 改為 Optical Flow（光流法）畫面會更流暢。'
+    description: "開啟速度設定視窗，製作快轉 (200%)、慢動作 (50%) 或倒放 (Reverse Speed)。",
+    proTip: "做慢動作時，記得把 Time Interpolation 改為 Optical Flow（光流法）畫面會更流暢。",
   },
 
   // === 3. 播放與導覽 (Playback & JKL) ===
   {
-    id: 'pb-play-stop',
-    category: 'playback',
-    commandEn: 'Play-Stop Toggle',
-    nameZh: '播放 / 暫停',
-    winKeys: ['Space'],
-    macKeys: ['Space'],
+    id: "pb-play-stop",
+    category: "playback",
+    commandEn: "Play-Stop Toggle",
+    nameZh: "播放 / 暫停",
+    winKeys: ["Space"],
+    macKeys: ["Space"],
     essential: true,
-    description: '最基本的播放與暫停切換。',
-    proTip: '審片時除了空白鍵，更推薦練習右手放在 J、K、L 三顆鍵上！'
+    description: "最基本的播放與暫停切換。",
+    proTip: "審片時除了空白鍵，更推薦練習右手放在 J、K、L 三顆鍵上！",
   },
   {
-    id: 'pb-jkl',
-    category: 'playback',
-    commandEn: 'Shuttle Left / Stop / Right (J-K-L)',
-    nameZh: 'J倒退 / K暫停 / L快轉（倍速審片法）',
-    winKeys: ['J', 'K', 'L'],
-    macKeys: ['J', 'K', 'L'],
+    id: "pb-jkl",
+    category: "playback",
+    commandEn: "Shuttle Left / Stop / Right (J-K-L)",
+    nameZh: "J倒退 / K暫停 / L快轉（倍速審片法）",
+    winKeys: ["J", "K", "L"],
+    macKeys: ["J", "K", "L"],
     essential: true,
-    description: '按 L 正常播放，連按兩下 L 變 2 倍速快轉看毛片（Pitch 音調會自動維持正常聽得懂人話）；J 為倒放；K 為暫停。',
-    proTip: '同時按住 K + L 或 K + J，可以像轉飛梭一樣「逐格慢速微調」找最精準的切點！'
+    description:
+      "按 L 正常播放，連按兩下 L 變 2 倍速快轉看毛片（Pitch 音調會自動維持正常聽得懂人話）；J 為倒放；K 為暫停。",
+    proTip: "同時按住 K + L 或 K + J，可以像轉飛梭一樣「逐格慢速微調」找最精準的切點！",
   },
   {
-    id: 'pb-step-frame',
-    category: 'playback',
-    commandEn: 'Step Back / Forward 1 Frame',
-    nameZh: '退後 / 前進 1 影格 (Frame)',
-    winKeys: ['←', '→'],
-    macKeys: ['←', '→'],
+    id: "pb-step-frame",
+    category: "playback",
+    commandEn: "Step Back / Forward 1 Frame",
+    nameZh: "退後 / 前進 1 影格 (Frame)",
+    winKeys: ["←", "→"],
+    macKeys: ["←", "→"],
     essential: true,
-    description: '逐格移動播放頭，用於抓準眨眼瞬間或鼓點節拍。',
-    proTip: '按住 Shift + ← / → 則是每次跳動 5 影格 (5 Frames)。'
+    description: "逐格移動播放頭，用於抓準眨眼瞬間或鼓點節拍。",
+    proTip: "按住 Shift + ← / → 則是每次跳動 5 影格 (5 Frames)。",
   },
   {
-    id: 'pb-up-down',
-    category: 'playback',
-    commandEn: 'Go to Previous / Next Edit Point',
-    nameZh: '跳至上一個 / 下一個剪輯切點',
-    winKeys: ['↑', '↓'],
-    macKeys: ['↑', '↓'],
+    id: "pb-up-down",
+    category: "playback",
+    commandEn: "Go to Previous / Next Edit Point",
+    nameZh: "跳至上一個 / 下一個剪輯切點",
+    winKeys: ["↑", "↓"],
+    macKeys: ["↑", "↓"],
     essential: true,
-    description: '讓播放頭精準吸附到每個片段的交接處（切點），檢查轉場是否順暢。',
-    proTip: '不需要用滑鼠慢慢對準片段邊緣，按上下鍵就能瞬間對齊切口。'
+    description: "讓播放頭精準吸附到每個片段的交接處（切點），檢查轉場是否順暢。",
+    proTip: "不需要用滑鼠慢慢對準片段邊緣，按上下鍵就能瞬間對齊切口。",
   },
 
   // === 4. 標記與三點剪輯 (Markers & 3-Point) ===
   {
-    id: 'mk-in-out',
-    category: 'markers',
-    commandEn: 'Mark In / Mark Out',
-    nameZh: '標記入點 (In) / 出點 (Out)',
-    winKeys: ['I', 'O'],
-    macKeys: ['I', 'O'],
+    id: "mk-in-out",
+    category: "markers",
+    commandEn: "Mark In / Mark Out",
+    nameZh: "標記入點 (In) / 出點 (Out)",
+    winKeys: ["I", "O"],
+    macKeys: ["I", "O"],
     essential: true,
-    description: '在 Source Monitor 挑選素材精華區段，或在 Timeline 標記要預覽算圖、匯出的範圍。',
-    proTip: '要清除入出點時，按 Ctrl/Cmd + Shift + X (Clear In and Out)。'
+    description: "在 Source Monitor 挑選素材精華區段，或在 Timeline 標記要預覽算圖、匯出的範圍。",
+    proTip: "要清除入出點時，按 Ctrl/Cmd + Shift + X (Clear In and Out)。",
   },
   {
-    id: 'mk-insert-overwrite',
-    category: 'markers',
-    commandEn: 'Insert / Overwrite',
-    nameZh: '插入 (,) / 覆蓋 (.) 素材至時間軸',
-    winKeys: [',', '.'],
-    macKeys: [',', '.'],
+    id: "mk-insert-overwrite",
+    category: "markers",
+    commandEn: "Insert / Overwrite",
+    nameZh: "插入 (,) / 覆蓋 (.) 素材至時間軸",
+    winKeys: [",", "."],
+    macKeys: [",", "."],
     essential: true,
-    description: '在 Source 面板用 I / O 抓好片段後，按「,」會插入時間軸並把後面推開；按「.」則直接覆蓋上去。',
-    proTip: '這就是專業剪輯的「三點剪輯法 (Three-Point Editing)」，完全不需要用滑鼠拖拉素材！'
+    description:
+      "在 Source 面板用 I / O 抓好片段後，按「,」會插入時間軸並把後面推開；按「.」則直接覆蓋上去。",
+    proTip: "這就是專業剪輯的「三點剪輯法 (Three-Point Editing)」，完全不需要用滑鼠拖拉素材！",
   },
   {
-    id: 'mk-add-marker',
-    category: 'markers',
-    commandEn: 'Add Marker',
-    nameZh: '新增標記點 (打拍子神鍵)',
-    winKeys: ['M'],
-    macKeys: ['M'],
+    id: "mk-add-marker",
+    category: "markers",
+    commandEn: "Add Marker",
+    nameZh: "新增標記點 (打拍子神鍵)",
+    winKeys: ["M"],
+    macKeys: ["M"],
     essential: true,
-    description: '在時間軸或片段上留下綠色標記點。邊播音樂邊按 M 就能把所有節奏卡點標出來！',
-    proTip: '連按兩下 M 可以打開標記視窗寫備註（例如標記「這邊要補 B-Roll」或改顏色）。'
+    description: "在時間軸或片段上留下綠色標記點。邊播音樂邊按 M 就能把所有節奏卡點標出來！",
+    proTip: "連按兩下 M 可以打開標記視窗寫備註（例如標記「這邊要補 B-Roll」或改顏色）。",
   },
 
   // === 5. 字幕、特效與 2026 新功能 (Text & AI) ===
   {
-    id: 'ai-default-transition',
-    category: 'text_ai',
-    commandEn: 'Apply Default Video / Audio Transition',
-    nameZh: '一鍵套用預設視訊 / 音訊轉場',
-    winKeys: ['Ctrl', 'D'],
-    macKeys: ['Cmd', 'D'],
+    id: "ai-default-transition",
+    category: "text_ai",
+    commandEn: "Apply Default Video / Audio Transition",
+    nameZh: "一鍵套用預設視訊 / 音訊轉場",
+    winKeys: ["Ctrl", "D"],
+    macKeys: ["Cmd", "D"],
     essential: true,
-    description: '在切點上直接套用 Cross Dissolve（交叉溶解）。若加按 Shift (Ctrl/Cmd + Shift + D) 則是套用音訊淡入淡出 (Constant Power)。',
-    proTip: '剪對話時，框選整排音訊按 Ctrl/Cmd + Shift + D，能瞬間消除所有切點的「啵」爆音！'
+    description:
+      "在切點上直接套用 Cross Dissolve（交叉溶解）。若加按 Shift (Ctrl/Cmd + Shift + D) 則是套用音訊淡入淡出 (Constant Power)。",
+    proTip: "剪對話時，框選整排音訊按 Ctrl/Cmd + Shift + D，能瞬間消除所有切點的「啵」爆音！",
   },
   {
-    id: 'ai-nest',
-    category: 'text_ai',
-    commandEn: 'Match Frame',
-    nameZh: '匹配影格（從時間軸反查原始素材）',
-    winKeys: ['F'],
-    macKeys: ['F'],
+    id: "ai-nest",
+    category: "text_ai",
+    commandEn: "Match Frame",
+    nameZh: "匹配影格（從時間軸反查原始素材）",
+    winKeys: ["F"],
+    macKeys: ["F"],
     essential: false,
-    description: '在時間軸看到某個畫面，按 F 會在 Source Monitor 直接打開該原始素材並停在同一秒。',
-    proTip: '當你想找同一鏡次前後還有沒有其他可用鏡頭時，按 F 鍵一秒搞定。'
+    description: "在時間軸看到某個畫面，按 F 會在 Source Monitor 直接打開該原始素材並停在同一秒。",
+    proTip: "當你想找同一鏡次前後還有沒有其他可用鏡頭時，按 F 鍵一秒搞定。",
   },
   {
-    id: 'ai-audio-gain',
-    category: 'text_ai',
-    commandEn: 'Audio Gain',
-    nameZh: '快速調整音訊增益 (音量大小)',
-    winKeys: ['G'],
-    macKeys: ['G'],
+    id: "ai-audio-gain",
+    category: "text_ai",
+    commandEn: "Audio Gain",
+    nameZh: "快速調整音訊增益 (音量大小)",
+    winKeys: ["G"],
+    macKeys: ["G"],
     essential: true,
-    description: '選取音訊片段按 G，直接輸入 +3dB 或設定 Normalize Max Peak 自動標準化音量。',
-    proTip: '2026 版也可以直接在片段左上方拖曳 Clip Mixer，或開啟 Essential Sound 面板用 AI Enhance Speech。'
+    description: "選取音訊片段按 G，直接輸入 +3dB 或設定 Normalize Max Peak 自動標準化音量。",
+    proTip:
+      "2026 版也可以直接在片段左上方拖曳 Clip Mixer，或開啟 Essential Sound 面板用 AI Enhance Speech。",
   },
 
   // === 6. 專案與視窗管理 (Project & UI) ===
   {
-    id: 'ui-import',
-    category: 'project',
-    commandEn: 'Import Media',
-    nameZh: '匯入媒體素材',
-    winKeys: ['Ctrl', 'I'],
-    macKeys: ['Cmd', 'I'],
+    id: "ui-import",
+    category: "project",
+    commandEn: "Import Media",
+    nameZh: "匯入媒體素材",
+    winKeys: ["Ctrl", "I"],
+    macKeys: ["Cmd", "I"],
     essential: true,
-    description: '開啟檔案瀏覽器或切換至匯入介面，將影片、音訊、圖片載入 Project Panel。',
-    proTip: '在 Project 面板空白處直接「連點兩下滑鼠左鍵」也有完全相同的效果！'
+    description: "開啟檔案瀏覽器或切換至匯入介面，將影片、音訊、圖片載入 Project Panel。",
+    proTip: "在 Project 面板空白處直接「連點兩下滑鼠左鍵」也有完全相同的效果！",
   },
   {
-    id: 'ui-export',
-    category: 'project',
-    commandEn: 'Export Media',
-    nameZh: '切換至 Export 匯出模式',
-    winKeys: ['Ctrl', 'M'],
-    macKeys: ['Cmd', 'M'],
+    id: "ui-export",
+    category: "project",
+    commandEn: "Export Media",
+    nameZh: "切換至 Export 匯出模式",
+    winKeys: ["Ctrl", "M"],
+    macKeys: ["Cmd", "M"],
     essential: true,
-    description: '直接進入 2026 Export Mode 面板，設定 H.264、YouTube 預設集並輸出成片。',
-    proTip: '匯出前建議先在時間軸用 I 和 O 確認輸出範圍，避免把後面忘記刪的廢片一起算進去。'
+    description: "直接進入 2026 Export Mode 面板，設定 H.264、YouTube 預設集並輸出成片。",
+    proTip: "匯出前建議先在時間軸用 I 和 O 確認輸出範圍，避免把後面忘記刪的廢片一起算進去。",
   },
   {
-    id: 'ui-maximize-panel',
-    category: 'project',
-    commandEn: 'Maximize or Restore Frame Under Cursor',
-    nameZh: '全螢幕放大游標所在的面板',
-    winKeys: ['` (波浪鍵)'],
-    macKeys: ['` (波浪鍵)'],
+    id: "ui-maximize-panel",
+    category: "project",
+    commandEn: "Maximize or Restore Frame Under Cursor",
+    nameZh: "全螢幕放大游標所在的面板",
+    winKeys: ["` (波浪鍵)"],
+    macKeys: ["` (波浪鍵)"],
     essential: true,
-    description: '按一下鍵盤左上角 Esc 下方的「`」鍵，滑鼠指著哪個面板（如 Timeline 或 Project），該面板就會瞬間放大填滿整個螢幕！再按一下恢復。',
-    proTip: '筆電螢幕較小時的救星！整理大量軌道或看文字轉錄稿 (Text Panel) 時必用。'
+    description:
+      "按一下鍵盤左上角 Esc 下方的「`」鍵，滑鼠指著哪個面板（如 Timeline 或 Project），該面板就會瞬間放大填滿整個螢幕！再按一下恢復。",
+    proTip: "筆電螢幕較小時的救星！整理大量軌道或看文字轉錄稿 (Text Panel) 時必用。",
   },
   {
-    id: 'ui-full-screen-video',
-    category: 'project',
-    commandEn: 'Toggle Full Screen Video',
-    nameZh: '純畫面全螢幕預覽',
-    winKeys: ['Ctrl', '`'],
-    macKeys: ['Ctrl', '`'],
+    id: "ui-full-screen-video",
+    category: "project",
+    commandEn: "Toggle Full Screen Video",
+    nameZh: "純畫面全螢幕預覽",
+    winKeys: ["Ctrl", "`"],
+    macKeys: ["Ctrl", "`"],
     essential: true,
-    description: '將 Program Monitor 預覽畫面放大到整個螢幕（隱藏所有介面邊框），方便檢查畫質與字幕位置。',
-    proTip: '注意：Mac 版預設也是按 Control + `（不是 Cmd 喔）！'
-  }
+    description:
+      "將 Program Monitor 預覽畫面放大到整個螢幕（隱藏所有介面邊框），方便檢查畫質與字幕位置。",
+    proTip: "注意：Mac 版預設也是按 Control + `（不是 Cmd 喔）！",
+  },
 ];
 </file>
 
@@ -825,316 +824,345 @@ export const SHORTCUTS_DATA = [
 // src/data/tutorialsData.js
 
 export const TUTORIAL_LEVELS = [
-  { id: 'beginner', title: 'LEVEL 1 · 初學者地基篇 (Beginner)' },
-  { id: 'intermediate', title: 'LEVEL 2 · 中階流暢與質感篇 (Intermediate)' },
-  { id: 'advanced', title: 'LEVEL 3 · 進階效率與特效篇 (Advanced)' }
+  { id: "beginner", title: "LEVEL 1 · 初學者地基篇 (Beginner)" },
+  { id: "intermediate", title: "LEVEL 2 · 中階流暢與質感篇 (Intermediate)" },
+  { id: "advanced", title: "LEVEL 3 · 進階效率與特效篇 (Advanced)" },
 ];
 
 export const TUTORIALS_DATA = [
   // ==================== LEVEL 1: 初學者篇 ====================
   {
-    id: 'ch1-project-sequence',
-    level: 'beginner',
-    chapterCode: 'CH 01',
-    title: '建立專案、切換英文介面與 Sequence 序列黃金設定',
-    subtitle: '搞懂 Frame Rate 與 1080p/4K 設定，避免匯出黑邊或掉格',
-    readTime: '8 min',
-    summary: '在 Premiere Pro 中，「Project (.prproj)」就像一個大公事包，而裡面可以建立很多條「Sequence（序列/時間軸）」。剪輯的第一步，就是確保序列的解析度與影格率符合你的拍攝素材。',
+    id: "ch1-project-sequence",
+    level: "beginner",
+    chapterCode: "CH 01",
+    title: "建立專案、切換英文介面與 Sequence 序列黃金設定",
+    subtitle: "搞懂 Frame Rate 與 1080p/4K 設定，避免匯出黑邊或掉格",
+    readTime: "8 min",
+    summary:
+      "在 Premiere Pro 中，「Project (.prproj)」就像一個大公事包，而裡面可以建立很多條「Sequence（序列/時間軸）」。剪輯的第一步，就是確保序列的解析度與影格率符合你的拍攝素材。",
     keyTerms: [
-      { zh: '序列（時間軸）', en: 'Sequence' },
-      { zh: '影格率（每秒張數）', en: 'Frame Rate (Timebase)' },
-      { zh: '像素長寬比', en: 'Pixel Aspect Ratio (Square Pixels 1.0)' },
-      { zh: '代理剪輯檔', en: 'Proxy Media' }
+      { zh: "序列（時間軸）", en: "Sequence" },
+      { zh: "影格率（每秒張數）", en: "Frame Rate (Timebase)" },
+      { zh: "像素長寬比", en: "Pixel Aspect Ratio (Square Pixels 1.0)" },
+      { zh: "代理剪輯檔", en: "Proxy Media" },
     ],
     steps: [
       {
-        stepTitle: '小技巧：如何將 Premiere Pro 2026 切換為中/英文雙語或純英文介面？',
-        uiPath: 'Ctrl/Cmd + F12 → Console Panel → Debug Database View',
-        content: '為什麼專業教學都推薦用英文版？因為所有特效名稱（如 Warp Stabilizer、Lumetri Color）與國際論壇除錯都以英文為主。若你的軟體是中文版，無須重灌，只需透過內建工程面板即可一秒改為英文介面：',
+        stepTitle: "小技巧：如何將 Premiere Pro 2026 切換為中/英文雙語或純英文介面？",
+        uiPath: "Ctrl/Cmd + F12 → Console Panel → Debug Database View",
+        content:
+          "為什麼專業教學都推薦用英文版？因為所有特效名稱（如 Warp Stabilizer、Lumetri Color）與國際論壇除錯都以英文為主。若你的軟體是中文版，無須重灌，只需透過內建工程面板即可一秒改為英文介面：",
         diagram: `[ 切換英文介面 3 步驟 ]\n1. 在軟體內按下 Ctrl + F12 (Mac: Cmd + Fn + F12) 喚出 Console 面板\n2. 點擊 Console 標題旁的三條線選單 (≡) ➔ 勾選「Debug Database View」\n3. 找到「ApplicationLanguage」欄位：\n   • 輸入 en_US ➔ 純英文介面 (推薦！)\n   • 勾選 Bilingual ➔ 中英雙語同時顯示 (適合過渡期)\n4. 重新啟動 Premiere Pro 立即生效！`,
-        winKeys: ['Ctrl', 'F12'],
-        macKeys: ['Cmd', 'F12']
+        winKeys: ["Ctrl", "F12"],
+        macKeys: ["Cmd", "F12"],
       },
       {
-        stepTitle: '建立新專案 (New Project) 與整理 Bins 資料夾',
-        uiPath: 'Home Screen → New Project → Project Panel (左下角)',
-        content: '打開 Premiere 2026 點擊 New Project，輸入專案名稱並選擇硬碟儲存路徑（建議放在 SSD 固態硬碟）。進入主畫面後，在左下角 Project 面板空白處按右鍵選「New Bin」，建立 4 個標準分類資料夾：',
+        stepTitle: "建立新專案 (New Project) 與整理 Bins 資料夾",
+        uiPath: "Home Screen → New Project → Project Panel (左下角)",
+        content:
+          "打開 Premiere 2026 點擊 New Project，輸入專案名稱並選擇硬碟儲存路徑（建議放在 SSD 固態硬碟）。進入主畫面後，在左下角 Project 面板空白處按右鍵選「New Bin」，建立 4 個標準分類資料夾：",
         diagram: `📁 Project: MyFirstVlog.prproj\n ├── 📁 01_Footage   (放相機/手機拍的原始影片毛片)\n ├── 📁 02_Audio     (放 BGM 背景音樂、SFX 音效)\n ├── 📁 03_Graphics  (放 Logo、字卡、PNG 去背圖)\n └── 📁 04_Sequences (放時間軸序列，千萬別跟毛片混在一起！)`,
-        winKeys: ['Ctrl', 'I'],
-        macKeys: ['Cmd', 'I']
+        winKeys: ["Ctrl", "I"],
+        macKeys: ["Cmd", "I"],
       },
       {
-        stepTitle: '建立黃金標準 Sequence（序列設定不踩雷）',
-        uiPath: 'File → New → Sequence (或直接將第一支主力影片拖曳至 Timeline)',
-        content: '新手最怕自己設錯序列規格！有兩個最安全的方法：(1) 直接把你拍好的主力影片從 Project 拖進右側空白 Timeline，Pr 會自動建立一模一樣規格的序列；(2) 按 Ctrl/Cmd + N 手動設定橫式或直式短影音規格：',
+        stepTitle: "建立黃金標準 Sequence（序列設定不踩雷）",
+        uiPath: "File → New → Sequence (或直接將第一支主力影片拖曳至 Timeline)",
+        content:
+          "新手最怕自己設錯序列規格！有兩個最安全的方法：(1) 直接把你拍好的主力影片從 Project 拖進右側空白 Timeline，Pr 會自動建立一模一樣規格的序列；(2) 按 Ctrl/Cmd + N 手動設定橫式或直式短影音規格：",
         diagram: `[ 2026 常用 Sequence Settings 規格表 ]\n• YouTube 橫式標準 (1080p) : Frame Size 1920 x 1080 (16:9) | 29.97 or 30 fps\n• YouTube 高畫質 (4K)      : Frame Size 3840 x 2160 (16:9) | 29.97 or 60 fps\n• Reels / Shorts 直式短片   : Frame Size 1080 x 1920 (9:16) | 30 or 60 fps\n• 電影感敘事短片           : Frame Size 1920 x 1080        | 23.976 or 24 fps`,
-        winKeys: ['Ctrl', 'N'],
-        macKeys: ['Cmd', 'N']
-      }
+        winKeys: ["Ctrl", "N"],
+        macKeys: ["Cmd", "N"],
+      },
     ],
-    practiceTask: '打開你的 Premiere Pro 2026，建立一個名為「Practice_01」的專案，在 Project 面板建立 4 個分類 Bins，並按 Ctrl/Cmd + N 建立一個 1920x1080、30fps 的 Sequence。'
+    practiceTask:
+      "打開你的 Premiere Pro 2026，建立一個名為「Practice_01」的專案，在 Project 面板建立 4 個分類 Bins，並按 Ctrl/Cmd + N 建立一個 1920x1080、30fps 的 Sequence。",
   },
 
   {
-    id: 'ch2-rough-cut',
-    level: 'beginner',
-    chapterCode: 'CH 02',
-    title: '極速粗剪實戰：Source 預覽與黃金左手 Q / W 波紋剪輯',
-    subtitle: '戒掉「用滑鼠慢慢拉邊緣補空隙」的慢速習慣',
-    readTime: '12 min',
-    summary: '拿到幾十段拍攝毛片時，千萬別一股腦全部丟進時間軸！學會「先在 Source 挑精華」以及在時間軸用「Q、W、Ctrl+K」連切帶刪，你的粗剪速度會比別人快上 3 倍。',
+    id: "ch2-rough-cut",
+    level: "beginner",
+    chapterCode: "CH 02",
+    title: "極速粗剪實戰：Source 預覽與黃金左手 Q / W 波紋剪輯",
+    subtitle: "戒掉「用滑鼠慢慢拉邊緣補空隙」的慢速習慣",
+    readTime: "12 min",
+    summary:
+      "拿到幾十段拍攝毛片時，千萬別一股腦全部丟進時間軸！學會「先在 Source 挑精華」以及在時間軸用「Q、W、Ctrl+K」連切帶刪，你的粗剪速度會比別人快上 3 倍。",
     keyTerms: [
-      { zh: '入點 / 出點', en: 'In Point (I) / Out Point (O)' },
-      { zh: '波紋刪除（自動貼齊）', en: 'Ripple Delete' },
-      { zh: '播放頭', en: 'Playhead' },
-      { zh: '剃刀與切點', en: 'Razor & Edit Point' }
+      { zh: "入點 / 出點", en: "In Point (I) / Out Point (O)" },
+      { zh: "波紋刪除（自動貼齊）", en: "Ripple Delete" },
+      { zh: "播放頭", en: "Playhead" },
+      { zh: "剃刀與切點", en: "Razor & Edit Point" },
     ],
     steps: [
       {
-        stepTitle: '第一關：在 Source Monitor 用 I 與 O 挑選可用鏡頭',
-        uiPath: 'Double-click clip in Project Panel → Source Monitor (左上角)',
-        content: '在左下角 Project 面板「連點兩下」影片素材，它會出現在左上角的 Source Monitor。按 L 快轉瀏覽，看到主角準備開口講話時按「I (Mark In)」，講完話瞬間按「O (Mark Out)」，最後按「. (句號 Overwrite)」或直接把畫面往下拖進時間軸。',
+        stepTitle: "第一關：在 Source Monitor 用 I 與 O 挑選可用鏡頭",
+        uiPath: "Double-click clip in Project Panel → Source Monitor (左上角)",
+        content:
+          "在左下角 Project 面板「連點兩下」影片素材，它會出現在左上角的 Source Monitor。按 L 快轉瀏覽，看到主角準備開口講話時按「I (Mark In)」，講完話瞬間按「O (Mark Out)」，最後按「. (句號 Overwrite)」或直接把畫面往下拖進時間軸。",
         diagram: `Source Monitor 預覽軸：\n[ 晃動廢片... ] ┣━━━━━━ (I 入點：精華對話區段 ：O 出點) ━━━━━━┫ [ 結尾NG... ]\n                         ⬇ 按下「 , (Insert)」或「 . (Overwrite)」\nTimeline 時間軸：        [====== 只有精華區段乾淨進入時間軸 ======]`,
-        winKeys: ['I', 'O'],
-        macKeys: ['I', 'O']
+        winKeys: ["I", "O"],
+        macKeys: ["I", "O"],
       },
       {
-        stepTitle: '第二關：時間軸上的神級組合技 —— Q 砍頭、W 砍尾',
-        uiPath: 'Timeline Panel → Playhead position → Press Q or W',
-        content: '傳統做法是：按 C 切一刀 → 按 V 選取廢片 → 按 Delete → 再把後面片段拉過來補黑洞（共 4 步）。在 Premiere Pro 中，你只需要把藍色播放頭 (Playhead) 停在正確位置，按一顆鍵就結束了：',
+        stepTitle: "第二關：時間軸上的神級組合技 —— Q 砍頭、W 砍尾",
+        uiPath: "Timeline Panel → Playhead position → Press Q or W",
+        content:
+          "傳統做法是：按 C 切一刀 → 按 V 選取廢片 → 按 Delete → 再把後面片段拉過來補黑洞（共 4 步）。在 Premiere Pro 中，你只需要把藍色播放頭 (Playhead) 停在正確位置，按一顆鍵就結束了：",
         diagram: `【按 Q 鍵：Ripple Trim Previous (砍掉播放頭左邊到上個切點 + 自動往前補齊)】\n切點A ─── [ 呃...那個...(廢話) | 💙播放頭 大家好我是... ] ─── 切點B\n按下 Q 鍵後 ➔ [ 💙大家好我是... ] (前面廢話瞬間消失且不留黑格！)\n\n【按 W 鍵：Ripple Trim Next (砍掉播放頭右邊到下個切點 + 自動往前補齊)】\n切點A ─── [ 今天分享到這邊！💙播放頭 | (低頭關相機廢片...) ] ─── 切點B\n按下 W 鍵後 ➔ [ 今天分享到這邊！💙 ] [ 下一段影片自動無縫接上 ]`,
-        winKeys: ['Q', 'W'],
-        macKeys: ['Q', 'W']
+        winKeys: ["Q", "W"],
+        macKeys: ["Q", "W"],
       },
       {
-        stepTitle: '第三關：片段中間有口誤怎麼辦？Ctrl/Cmd + K 一刀切開',
-        uiPath: 'Timeline Panel → Add Edit (Ctrl/Cmd + K)',
-        content: '如果廢話在片段正中間，把播放頭移到廢話開頭按「Ctrl/Cmd + K」切一刀，再移到廢話結束瞬間直接按「Q」，中間那段口誤就會直接被吃掉並無縫接合！',
+        stepTitle: "第三關：片段中間有口誤怎麼辦？Ctrl/Cmd + K 一刀切開",
+        uiPath: "Timeline Panel → Add Edit (Ctrl/Cmd + K)",
+        content:
+          "如果廢話在片段正中間，把播放頭移到廢話開頭按「Ctrl/Cmd + K」切一刀，再移到廢話結束瞬間直接按「Q」，中間那段口誤就會直接被吃掉並無縫接合！",
         diagram: `[ 正常說話A ] ✂️(按 Ctrl+K 切開) [ 中間口誤NG... | 💙播放頭 正常說話B ]\n                                                   ⬆ 在這按 Q 鍵！\n結果 ➔ [ 正常說話A ][ 正常說話B ] (無縫接合完成)`,
-        winKeys: ['Ctrl', 'K'],
-        macKeys: ['Cmd', 'K']
-      }
+        winKeys: ["Ctrl", "K"],
+        macKeys: ["Cmd", "K"],
+      },
     ],
-    practiceTask: '匯入一段隨手用手機拍的 1 分鐘講話影片，強迫自己「完全不使用滑鼠點剃刀工具 (C)」，只用 Space / JKL 播放、Ctrl+K 切開、以及 Q 與 W 鍵，把所有停頓與廢話剪乾淨！'
+    practiceTask:
+      "匯入一段隨手用手機拍的 1 分鐘講話影片，強迫自己「完全不使用滑鼠點剃刀工具 (C)」，只用 Space / JKL 播放、Ctrl+K 切開、以及 Q 與 W 鍵，把所有停頓與廢話剪乾淨！",
   },
 
   {
-    id: 'ch3-properties-panel',
-    level: 'beginner',
-    chapterCode: 'CH 03',
-    title: '2026 全新 Properties Panel（隨選智慧屬性面板）與字幕實戰',
-    subtitle: '點選什麼就顯示什麼！縮放構圖、快速裁切與上字幕一次搞定',
-    readTime: '10 min',
-    summary: '在 Premiere Pro 2026 (v26.0) 中，右側的 Properties Panel 是新手最大的福音。無論你想把畫面放大做跳剪 (Jump Cut)、加上雙語字幕、還是調整音量，點一下片段就能直接在右側面板修改。',
+    id: "ch3-properties-panel",
+    level: "beginner",
+    chapterCode: "CH 03",
+    title: "2026 全新 Properties Panel（隨選智慧屬性面板）與字幕實戰",
+    subtitle: "點選什麼就顯示什麼！縮放構圖、快速裁切與上字幕一次搞定",
+    readTime: "10 min",
+    summary:
+      "在 Premiere Pro 2026 (v26.0) 中，右側的 Properties Panel 是新手最大的福音。無論你想把畫面放大做跳剪 (Jump Cut)、加上雙語字幕、還是調整音量，點一下片段就能直接在右側面板修改。",
     keyTerms: [
-      { zh: '智慧屬性面板', en: 'Properties Panel' },
-      { zh: '畫面縮放與位置', en: 'Scale & Position' },
-      { zh: '快速裁切模式', en: 'Quick Crop' },
-      { zh: '文字圖層樣式', en: 'Graphic Text & Linked Style' }
+      { zh: "智慧屬性面板", en: "Properties Panel" },
+      { zh: "畫面縮放與位置", en: "Scale & Position" },
+      { zh: "快速裁切模式", en: "Quick Crop" },
+      { zh: "文字圖層樣式", en: "Graphic Text & Linked Style" },
     ],
     steps: [
       {
-        stepTitle: '點選影片片段：一秒調整 Scale（放大鏡次）與 Crop（裁切）',
-        uiPath: 'Select Video Clip in Timeline (Press D) → Properties Panel (右側)',
-        content: '在剪訪談或 Vlog 時，如果兩段話剪在一起畫面跳動很突兀（Jump Cut），只要選取第二段影片（按 D），在右側 Properties 面板將 Scale 從 100% 改為 115%～120%，瞬間就像換了一台特寫機位一樣自然！',
+        stepTitle: "點選影片片段：一秒調整 Scale（放大鏡次）與 Crop（裁切）",
+        uiPath: "Select Video Clip in Timeline (Press D) → Properties Panel (右側)",
+        content:
+          "在剪訪談或 Vlog 時，如果兩段話剪在一起畫面跳動很突兀（Jump Cut），只要選取第二段影片（按 D），在右側 Properties 面板將 Scale 從 100% 改為 115%～120%，瞬間就像換了一台特寫機位一樣自然！",
         diagram: `Properties Panel (當選取 Video Clip 時)：\n┌──────────────────────────────────────────┐\n│ Transform                                │\n│  • Position : [ 960.0 ]  [ 540.0 ]       │\n│  • Scale    : [ 118.0 % ] ━━●━━━━━━ (放大構圖消除跳接感)\n│  • Crop     : [ Left / Right / Top / Bottom ] │\n│  • Opacity  : [ 100.0 % ]                │\n└──────────────────────────────────────────┘`,
-        winKeys: ['D'],
-        macKeys: ['D']
+        winKeys: ["D"],
+        macKeys: ["D"],
       },
       {
-        stepTitle: '使用 Type Tool 建立標題字卡與 Linked Style（統一樣式）',
-        uiPath: 'Press Ctrl/Cmd + T → Program Monitor → Properties Panel',
-        content: '按下 Ctrl/Cmd + T 即可直接在畫面中央產生新的文字層（位於時間軸 V2 軌）。在右側 Properties 面板中調整字型 (Font)、填色 (Fill)、描邊 (Stroke) 與圓角背景底框 (Background)，並可儲存為 Linked Style 一鍵套用到整支影片。',
+        stepTitle: "使用 Type Tool 建立標題字卡與 Linked Style（統一樣式）",
+        uiPath: "Press Ctrl/Cmd + T → Program Monitor → Properties Panel",
+        content:
+          "按下 Ctrl/Cmd + T 即可直接在畫面中央產生新的文字層（位於時間軸 V2 軌）。在右側 Properties 面板中調整字型 (Font)、填色 (Fill)、描邊 (Stroke) 與圓角背景底框 (Background)，並可儲存為 Linked Style 一鍵套用到整支影片。",
         diagram: `[ 高質感 YouTube 字幕建議參數 (Properties > Appearance) ]\n• Fill (文字顏色)       : #FFFFFF (純白) 或 #FFD34E (重點亮黃)\n• Stroke (外框描邊)     : 勾選，設為黑色 #000000，粗細 4 ~ 8 px\n• Background (半透明底) : 勾選，黑色不透明度 65%，Corner Radius (圓角) 設為 16`,
-        winKeys: ['Ctrl', 'T'],
-        macKeys: ['Cmd', 'T']
-      }
+        winKeys: ["Ctrl", "T"],
+        macKeys: ["Cmd", "T"],
+      },
     ],
-    practiceTask: '在你的時間軸上任選一段影片按 Ctrl+K 切成兩半，將後半段的 Scale 放大為 115%，並在 V2 軌按 Ctrl+T 加上一行帶有半透明圓角黑底的標題字幕。'
+    practiceTask:
+      "在你的時間軸上任選一段影片按 Ctrl+K 切成兩半，將後半段的 Scale 放大為 115%，並在 V2 軌按 Ctrl+T 加上一行帶有半透明圓角黑底的標題字幕。",
   },
 
   // ==================== LEVEL 2: 中階進修篇 ====================
   {
-    id: 'ch4-keyframes-motion',
-    level: 'intermediate',
-    chapterCode: 'CH 04',
-    title: 'Keyframes 關鍵影格動畫與 Bezier 絲滑緩動曲線',
-    subtitle: '做出專業紀錄片般的 Ken Burns 緩慢推軌運鏡與字卡滑入效果',
-    readTime: '15 min',
-    summary: '為什麼別人做的圖片放大或字卡進場看起來特別絲滑，而自己做的卻像機器人一樣生硬？關鍵就在於「關鍵影格（Keyframes）」與「Ease In / Ease Out（貝茲曲線緩動）」。',
+    id: "ch4-keyframes-motion",
+    level: "intermediate",
+    chapterCode: "CH 04",
+    title: "Keyframes 關鍵影格動畫與 Bezier 絲滑緩動曲線",
+    subtitle: "做出專業紀錄片般的 Ken Burns 緩慢推軌運鏡與字卡滑入效果",
+    readTime: "15 min",
+    summary:
+      "為什麼別人做的圖片放大或字卡進場看起來特別絲滑，而自己做的卻像機器人一樣生硬？關鍵就在於「關鍵影格（Keyframes）」與「Ease In / Ease Out（貝茲曲線緩動）」。",
     keyTerms: [
-      { zh: '關鍵影格（碼錶圖示）', en: 'Toggle Animation (Stopwatch Icon)' },
-      { zh: '緩入 / 緩出', en: 'Temporal Interpolation: Ease In / Ease Out' },
-      { zh: '效果控制面板', en: 'Effect Controls Panel' },
-      { zh: '動態模糊', en: 'Transform Effect (Shutter Angle)' }
+      { zh: "關鍵影格（碼錶圖示）", en: "Toggle Animation (Stopwatch Icon)" },
+      { zh: "緩入 / 緩出", en: "Temporal Interpolation: Ease In / Ease Out" },
+      { zh: "效果控制面板", en: "Effect Controls Panel" },
+      { zh: "動態模糊", en: "Transform Effect (Shutter Angle)" },
     ],
     steps: [
       {
-        stepTitle: '打下兩個關鍵影格：起點 (A) 與終點 (B) 的狀態變化',
-        uiPath: 'Select Clip → Effect Controls Panel (左上角頁籤) → Motion',
-        content: '要讓畫面產生動態，只需記住口訣：「先移時間軸播放頭 → 點一下碼錶圖示 (Toggle Animation) 打第一顆點 → 往後移播放頭 → 改數值自動產生第二顆點」。',
+        stepTitle: "打下兩個關鍵影格：起點 (A) 與終點 (B) 的狀態變化",
+        uiPath: "Select Clip → Effect Controls Panel (左上角頁籤) → Motion",
+        content:
+          "要讓畫面產生動態，只需記住口訣：「先移時間軸播放頭 → 點一下碼錶圖示 (Toggle Animation) 打第一顆點 → 往後移播放頭 → 改數值自動產生第二顆點」。",
         diagram: `Effect Controls > Motion > Scale 關鍵影格時間軸：\n\n00:00 (片段起點)                        00:04 (4秒後)\n   ◆ (點擊碼錶：設為 100%) ───────────────► ◆ (輸入 115%，自動產生第二顆菱形點)\n   結果：畫面會在 4 秒內由 100% 平滑放大至 115% (推軌運鏡感)`,
-        winKeys: ['Shift', '5'],
-        macKeys: ['Shift', '5']
+        winKeys: ["Shift", "5"],
+        macKeys: ["Shift", "5"],
       },
       {
-        stepTitle: '告別機械感：右鍵改為 Bezier (Ease Out / Ease In)',
-        uiPath: 'Right-click Keyframe in Effect Controls → Temporal Interpolation',
-        content: '預設的菱形關鍵影格是「Linear（等速直線運動）」，起步和煞車都很生硬。對著第一顆點按右鍵選「Ease Out（緩出：起步加速）」，對著最後一顆點按右鍵選「Ease In（緩入：結尾減速煞車）」，並展開小箭頭拉動曲線手把，動態瞬間擁有蘋果發表會般的絲滑感！',
+        stepTitle: "告別機械感：右鍵改為 Bezier (Ease Out / Ease In)",
+        uiPath: "Right-click Keyframe in Effect Controls → Temporal Interpolation",
+        content:
+          "預設的菱形關鍵影格是「Linear（等速直線運動）」，起步和煞車都很生硬。對著第一顆點按右鍵選「Ease Out（緩出：起步加速）」，對著最後一顆點按右鍵選「Ease In（緩入：結尾減速煞車）」，並展開小箭頭拉動曲線手把，動態瞬間擁有蘋果發表會般的絲滑感！",
         diagram: `[ Linear 等速運動 ]  速度：━━━━━━━━━━ (生硬啟動、突然急煞)\n[ Ease Out + In ]    速度：╭━━━━━━━━╮ (溫柔起步、高速滑行、絲滑煞車，形狀變成沙漏 ⧗)`,
-        winKeys: ['←', '→'],
-        macKeys: ['←', '→']
-      }
+        winKeys: ["←", "→"],
+        macKeys: ["←", "→"],
+      },
     ],
-    practiceTask: '放一張靜態風景照或 B-Roll 到時間軸，在 Effect Controls 為 Scale 打上 100% 到 112% 的關鍵影格，並將兩顆點分別改為 Ease Out 與 Ease In。'
+    practiceTask:
+      "放一張靜態風景照或 B-Roll 到時間軸，在 Effect Controls 為 Scale 打上 100% 到 112% 的關鍵影格，並將兩顆點分別改為 Ease Out 與 Ease In。",
   },
 
   {
-    id: 'ch5-audio-color',
-    level: 'intermediate',
-    chapterCode: 'CH 05',
-    title: 'Essential Sound 智慧混音（自動壓低背景樂）與 Lumetri 基礎調色',
-    subtitle: '解決「背景音樂蓋過人聲」與「膚色暗沉偏黃」兩大痛點',
-    readTime: '15 min',
-    summary: '觀眾可以容忍畫質普通，但無法忍受忽大忽小、聽不清人聲的音訊！學會 Essential Sound 的 Auto-Ducking（自動閃避）與 Lumetri Scopes 波形圖看曝光，你的影片質感立刻超越 90% 的自媒體創作者。',
+    id: "ch5-audio-color",
+    level: "intermediate",
+    chapterCode: "CH 05",
+    title: "Essential Sound 智慧混音（自動壓低背景樂）與 Lumetri 基礎調色",
+    subtitle: "解決「背景音樂蓋過人聲」與「膚色暗沉偏黃」兩大痛點",
+    readTime: "15 min",
+    summary:
+      "觀眾可以容忍畫質普通，但無法忍受忽大忽小、聽不清人聲的音訊！學會 Essential Sound 的 Auto-Ducking（自動閃避）與 Lumetri Scopes 波形圖看曝光，你的影片質感立刻超越 90% 的自媒體創作者。",
     keyTerms: [
-      { zh: '人聲對話 / 背景音樂標籤', en: 'Audio Type: Dialogue / Music' },
-      { zh: '自動閃避（人聲說話時壓低音樂）', en: 'Ducking (Auto-Duck against Dialogue)' },
-      { zh: '亮度波形示波器', en: 'Lumetri Scopes (Waveform Luma)' },
-      { zh: '一級色彩校正', en: 'Basic Correction (WB / Exposure / Contrast)' }
+      { zh: "人聲對話 / 背景音樂標籤", en: "Audio Type: Dialogue / Music" },
+      { zh: "自動閃避（人聲說話時壓低音樂）", en: "Ducking (Auto-Duck against Dialogue)" },
+      { zh: "亮度波形示波器", en: "Lumetri Scopes (Waveform Luma)" },
+      { zh: "一級色彩校正", en: "Basic Correction (WB / Exposure / Contrast)" },
     ],
     steps: [
       {
-        stepTitle: '神技 Auto-Ducking：不需手動拉音量線，人聲開口音樂自動變小！',
-        uiPath: 'Window → Essential Sound → Tag Dialogue & Music → Enable Ducking',
-        content: '以前為了讓人聲清楚，要在音樂軌打幾十個關鍵影格把音量拉低。現在只需兩步：(1) 框選 A1 所有人聲片段，在 Essential Sound 點擊「Dialogue」；(2) 選取 A2 的背景音樂，點擊「Music」，勾選「Ducking」並按下「Generate Keyframes」，Pr 就會自動在有人講話的地方把音樂壓低 -15dB，停頓時音樂自動回升！',
+        stepTitle: "神技 Auto-Ducking：不需手動拉音量線，人聲開口音樂自動變小！",
+        uiPath: "Window → Essential Sound → Tag Dialogue & Music → Enable Ducking",
+        content:
+          "以前為了讓人聲清楚，要在音樂軌打幾十個關鍵影格把音量拉低。現在只需兩步：(1) 框選 A1 所有人聲片段，在 Essential Sound 點擊「Dialogue」；(2) 選取 A2 的背景音樂，點擊「Music」，勾選「Ducking」並按下「Generate Keyframes」，Pr 就會自動在有人講話的地方把音樂壓低 -15dB，停頓時音樂自動回升！",
         diagram: `A1 (標記為 Dialogue) :  [ 大家好我是... ]         [ 今天要介紹... ]\nA2 (Music 開啟 Ducking): ━━━╲_______________╱━━━━━━━━━╲_______________╱━━━\n                           (有人說話自動壓低音量)     (空檔自動恢復音樂熱度)`,
-        winKeys: ['G'],
-        macKeys: ['G']
+        winKeys: ["G"],
+        macKeys: ["G"],
       },
       {
-        stepTitle: 'Lumetri Color 調色第一步：先看 Waveform 示波器，再調色溫與對比',
-        uiPath: 'Window → Lumetri Color & Lumetri Scopes',
-        content: '肉眼容易被螢幕亮度欺騙，調色時請務必打開「Lumetri Scopes (Waveform)」。刻度 0 代表死黑，100 代表死白過曝。透過 Basic Correction 調整 Exposure 與 Whites/Blacks，讓畫面波形均勻分佈在 10 到 90 之間，人臉膚色亮度落在 60~70 IRE 最自然！',
+        stepTitle: "Lumetri Color 調色第一步：先看 Waveform 示波器，再調色溫與對比",
+        uiPath: "Window → Lumetri Color & Lumetri Scopes",
+        content:
+          "肉眼容易被螢幕亮度欺騙，調色時請務必打開「Lumetri Scopes (Waveform)」。刻度 0 代表死黑，100 代表死白過曝。透過 Basic Correction 調整 Exposure 與 Whites/Blacks，讓畫面波形均勻分佈在 10 到 90 之間，人臉膚色亮度落在 60~70 IRE 最自然！",
         diagram: `[ Lumetri Color 標準調色順序 ]\n1. White Balance (白平衡) : 用滴管吸畫面中的白色物體，修正偏黃或偏藍\n2. Tone (曝光與動態範圍)  : Exposure (整體明暗) ➔ Highlights (壓回過曝天空) ➔ Shadows (提亮暗部細節)\n3. Saturation (飽和度)    : 微調至 105 ~ 115 讓色彩討喜（切勿拉過頭變螢光色）\n4. Creative (風格化 LUT)  : 套用電影感 LUT，並將 Intensity 強度降為 40%~60% 最耐看`,
-        winKeys: ['Ctrl', '`'],
-        macKeys: ['Ctrl', '`']
-      }
+        winKeys: ["Ctrl", "`"],
+        macKeys: ["Ctrl", "`"],
+      },
     ],
-    practiceTask: '在時間軸放上一段人聲與一首 BGM，使用 Essential Sound 完成 Auto-Ducking 自動壓音；並開啟 Lumetri Color 幫畫面校正白平衡與對比度。'
+    practiceTask:
+      "在時間軸放上一段人聲與一首 BGM，使用 Essential Sound 完成 Auto-Ducking 自動壓音；並開啟 Lumetri Color 幫畫面校正白平衡與對比度。",
   },
 
   // ==================== LEVEL 3: 進階實戰篇 ====================
   {
-    id: 'ch6-export-delivery',
-    level: 'advanced',
-    chapterCode: 'CH 06',
-    title: '2026 Export Mode 最佳化匯出設定與全鍵盤高效率客製化',
-    subtitle: '搞懂 H.264、VBR 鮑率控制、與 YouTube 4K 高畫質不壓縮秘訣',
-    readTime: '10 min',
-    summary: '辛苦剪完影片，最後一步匯出 (Export) 如果設錯，檔案可能肥大到好幾十 GB，或是上傳 YouTube 後變得很模糊。本章教你設定最佳 Bitrate（位元速率）與建立專屬快速鍵配置。',
+    id: "ch6-export-delivery",
+    level: "advanced",
+    chapterCode: "CH 06",
+    title: "2026 Export Mode 最佳化匯出設定與全鍵盤高效率客製化",
+    subtitle: "搞懂 H.264、VBR 鮑率控制、與 YouTube 4K 高畫質不壓縮秘訣",
+    readTime: "10 min",
+    summary:
+      "辛苦剪完影片，最後一步匯出 (Export) 如果設錯，檔案可能肥大到好幾十 GB，或是上傳 YouTube 後變得很模糊。本章教你設定最佳 Bitrate（位元速率）與建立專屬快速鍵配置。",
     keyTerms: [
-      { zh: 'H.264 通用封裝格式', en: 'Format: H.264 (.mp4)' },
-      { zh: '可變位元速率', en: 'Bitrate Encoding: VBR, 1 Pass' },
-      { zh: '硬體加速算圖', en: 'Performance: Hardware Encoding' },
-      { zh: '媒體編碼佇列', en: 'Send to Media Encoder' }
+      { zh: "H.264 通用封裝格式", en: "Format: H.264 (.mp4)" },
+      { zh: "可變位元速率", en: "Bitrate Encoding: VBR, 1 Pass" },
+      { zh: "硬體加速算圖", en: "Performance: Hardware Encoding" },
+      { zh: "媒體編碼佇列", en: "Send to Media Encoder" },
     ],
     steps: [
       {
-        stepTitle: '匯出前必做檢查：在時間軸用 I 與 O 框出正確輸出範圍',
-        uiPath: 'Timeline → Mark In (I) at 00:00 & Mark Out (O) at End → Ctrl/Cmd + M',
-        content: '很多新手匯出後發現片尾多了 3 分鐘的黑畫面，是因為時間軸後面留了一小塊忘記刪的碎片！養成習慣：在片頭按 I、片尾最後一格按 O，再按 Ctrl/Cmd + M 進入 Export Mode。',
+        stepTitle: "匯出前必做檢查：在時間軸用 I 與 O 框出正確輸出範圍",
+        uiPath: "Timeline → Mark In (I) at 00:00 & Mark Out (O) at End → Ctrl/Cmd + M",
+        content:
+          "很多新手匯出後發現片尾多了 3 分鐘的黑畫面，是因為時間軸後面留了一小塊忘記刪的碎片！養成習慣：在片頭按 I、片尾最後一格按 O，再按 Ctrl/Cmd + M 進入 Export Mode。",
         diagram: `[ 2026 Export Mode 黃金輸出參數 (Format: H.264) ]\n• Preset (預設集)       : Match Source - Adaptive High Bitrate\n• Video > Frame Size   : 確認與序列一致 (1920x1080 或 3840x2160)\n• Bitrate Settings     :\n  - 1080p 30fps 建議設為 : VBR, 1 Pass | Target Bitrate: 16 ~ 20 Mbps\n  - 4K 30/60fps 建議設為 : VBR, 1 Pass | Target Bitrate: 45 ~ 60 Mbps\n• Audio                : AAC | 320 kbps | 48000 Hz`,
-        winKeys: ['Ctrl', 'M'],
-        macKeys: ['Cmd', 'M']
-      }
+        winKeys: ["Ctrl", "M"],
+        macKeys: ["Cmd", "M"],
+      },
     ],
-    practiceTask: '將你前面練習剪好的時間軸標記好 In / Out，按 Ctrl/Cmd + M 進入匯出面板，檢查 Format 是否為 H.264，並成功輸出一支 MP4 成品影片！'
-  }
+    practiceTask:
+      "將你前面練習剪好的時間軸標記好 In / Out，按 Ctrl/Cmd + M 進入匯出面板，檢查 Format 是否為 H.264，並成功輸出一支 MP4 成品影片！",
+  },
 ];
 </file>
 
 <file path="src/pages/AIWorkflows.jsx">
 // src/pages/AIWorkflows.jsx
-import { useState } from 'react';
-import BilingualTag from '../components/ui/BilingualTag';
+import { useState } from "react";
+import BilingualTag from "../components/ui/BilingualTag";
 
 const AI_FEATURES_2026 = [
   {
-    id: 'text-editing',
-    badge: '效率提升 300% · 必學第一名',
-    titleEn: 'Text-Based Editing & Bulk Pause Removal',
-    titleZh: 'AI 語音轉文字剪輯 ＆ 一鍵批量砍停頓',
-    uiLocation: 'Window → Text → Transcript 頁籤',
-    summary: '在 Premiere Pro 2026 中，匯入訪談或 Vlog 毛片時會自動透過 AI 轉錄為逐字稿（支援繁體中文、粵語、英文）。你不需要再盯著音訊波形慢慢聽，直接在文字面板「選取文字按 Backspace 刪除」，時間軸上的影片就會自動完成 Ripple Cut（波紋切割並無縫貼齊）！',
+    id: "text-editing",
+    badge: "效率提升 300% · 必學第一名",
+    titleEn: "Text-Based Editing & Bulk Pause Removal",
+    titleZh: "AI 語音轉文字剪輯 ＆ 一鍵批量砍停頓",
+    uiLocation: "Window → Text → Transcript 頁籤",
+    summary:
+      "在 Premiere Pro 2026 中，匯入訪談或 Vlog 毛片時會自動透過 AI 轉錄為逐字稿（支援繁體中文、粵語、英文）。你不需要再盯著音訊波形慢慢聽，直接在文字面板「選取文字按 Backspace 刪除」，時間軸上的影片就會自動完成 Ripple Cut（波紋切割並無縫貼齊）！",
     steps: [
-      '開啟 Window > Text 面板，切到「Transcript」頁籤，點擊 Create transcript（語言可選 Traditional Chinese、Cantonese 或 English）。',
-      '點擊漏斗過濾圖示 (Filter)，勾選「Pauses（空白停頓）」與「Filler Words（贅字如 um, uh）」。',
-      '點擊「Delete All（全部刪除）」➔ 整支 20 分鐘毛片裡所有發呆、吸氣與冷場空白，1 秒內自動切乾淨並緊密貼齊！',
-      '剪完後點擊右上角「CC (Create Captions)」按鈕，直接將逐字稿轉成時間軸上的同步字幕軌！'
+      "開啟 Window > Text 面板，切到「Transcript」頁籤，點擊 Create transcript（語言可選 Traditional Chinese、Cantonese 或 English）。",
+      "點擊漏斗過濾圖示 (Filter)，勾選「Pauses（空白停頓）」與「Filler Words（贅字如 um, uh）」。",
+      "點擊「Delete All（全部刪除）」➔ 整支 20 分鐘毛片裡所有發呆、吸氣與冷場空白，1 秒內自動切乾淨並緊密貼齊！",
+      "剪完後點擊右上角「CC (Create Captions)」按鈕，直接將逐字稿轉成時間軸上的同步字幕軌！",
     ],
     terms: [
-      { zh: 'AI 逐字稿面板', en: 'Transcript' },
-      { zh: '贅字與語氣詞', en: 'Filler Words' },
-      { zh: '停頓空檔偵測', en: 'Pauses Detection' },
-      { zh: '一鍵轉為字幕軌', en: 'Create Captions from Transcript' }
-    ]
+      { zh: "AI 逐字稿面板", en: "Transcript" },
+      { zh: "贅字與語氣詞", en: "Filler Words" },
+      { zh: "停頓空檔偵測", en: "Pauses Detection" },
+      { zh: "一鍵轉為字幕軌", en: "Create Captions from Transcript" },
+    ],
   },
   {
-    id: 'generative-extend',
-    badge: 'Firefly Video AI · 2026 王牌功能',
-    titleEn: 'Generative Extend (Video & Audio Room Tone)',
-    titleZh: 'Firefly AI 生成式延展（無中生有補齊短缺畫面）',
-    uiLocation: 'Tools 工具列 → Generative Extend Tool (或長按 Ripple Edit B 鍵展開)',
-    summary: '剪片最崩潰的事：轉場差 1 秒鐘畫面才夠長，但攝影師當時已經按下停止錄影了！2026 版的 Generative Extend 讓你直接往外拖曳片段邊緣，由 Adobe Firefly AI 自動推算並生成最多 2 秒的真實連續動作畫面，甚至能延長多達 10 秒的現場環境底噪 (Room Tone)！',
+    id: "generative-extend",
+    badge: "Firefly Video AI · 2026 王牌功能",
+    titleEn: "Generative Extend (Video & Audio Room Tone)",
+    titleZh: "Firefly AI 生成式延展（無中生有補齊短缺畫面）",
+    uiLocation: "Tools 工具列 → Generative Extend Tool (或長按 Ripple Edit B 鍵展開)",
+    summary:
+      "剪片最崩潰的事：轉場差 1 秒鐘畫面才夠長，但攝影師當時已經按下停止錄影了！2026 版的 Generative Extend 讓你直接往外拖曳片段邊緣，由 Adobe Firefly AI 自動推算並生成最多 2 秒的真實連續動作畫面，甚至能延長多達 10 秒的現場環境底噪 (Room Tone)！",
     steps: [
-      '在時間軸左側工具列選擇「Generative Extend Tool（閃亮星星延展圖示）」。',
-      '直接點擊時間軸上太短的片段尾端（或開頭），往外拉出你需要的額外秒數。',
-      '放開滑鼠後，AI 會在幾秒鐘內自動分析人物眼神、背景雲朵或水波動態，無縫生成補齊畫面！',
-      '若針對純音訊軌拖曳，AI 會自動生成自然的現場環境音（Room Tone），徹底解決對話剪接處死寂突兀的問題。'
+      "在時間軸左側工具列選擇「Generative Extend Tool（閃亮星星延展圖示）」。",
+      "直接點擊時間軸上太短的片段尾端（或開頭），往外拉出你需要的額外秒數。",
+      "放開滑鼠後，AI 會在幾秒鐘內自動分析人物眼神、背景雲朵或水波動態，無縫生成補齊畫面！",
+      "若針對純音訊軌拖曳，AI 會自動生成自然的現場環境音（Room Tone），徹底解決對話剪接處死寂突兀的問題。",
     ],
     terms: [
-      { zh: 'AI 生成式延展', en: 'Generative Extend' },
-      { zh: '現場環境音補齊', en: 'AI Audio Room Tone Extension' },
-      { zh: '生成式 AI 標記', en: 'Content Credentials' }
-    ]
+      { zh: "AI 生成式延展", en: "Generative Extend" },
+      { zh: "現場環境音補齊", en: "AI Audio Room Tone Extension" },
+      { zh: "生成式 AI 標記", en: "Content Credentials" },
+    ],
   },
   {
-    id: 'object-masking',
-    badge: '免拉貝茲曲線 · 視覺特效革新',
-    titleEn: 'AI Object Masking & Fast Tracking',
-    titleZh: '2026 AI 智慧物件遮罩與自動追蹤',
-    uiLocation: 'Program Monitor 預覽視窗 → Object Mask Tool → Properties Panel',
-    summary: '過去想針對「畫面中的人臉局部提亮」或「把主角背後的路人模糊掉」，必須在 Effect Controls 手動一格一格拉鋼筆遮罩。2026 版導入全新 AI Object Masking，滑鼠移到主角或物件上會自動發光選取，一鍵完成高精準度動態追蹤遮罩！',
+    id: "object-masking",
+    badge: "免拉貝茲曲線 · 視覺特效革新",
+    titleEn: "AI Object Masking & Fast Tracking",
+    titleZh: "2026 AI 智慧物件遮罩與自動追蹤",
+    uiLocation: "Program Monitor 預覽視窗 → Object Mask Tool → Properties Panel",
+    summary:
+      "過去想針對「畫面中的人臉局部提亮」或「把主角背後的路人模糊掉」，必須在 Effect Controls 手動一格一格拉鋼筆遮罩。2026 版導入全新 AI Object Masking，滑鼠移到主角或物件上會自動發光選取，一鍵完成高精準度動態追蹤遮罩！",
     steps: [
-      '選取時間軸片段，在 Program Monitor 或 Properties 面板點擊「Object Mask（AI 物件遮罩）」。',
-      '將滑鼠游標移到畫面中的人物、汽車或商品上，AI 會即時框出紫色邊緣預覽，點一下即可建立遮罩。',
-      '搭配 Lumetri Color，你可以單獨將主角提亮 0.5 格曝光，或反轉遮罩 (Invert) 將背景壓暗營造立體電影感！'
+      "選取時間軸片段，在 Program Monitor 或 Properties 面板點擊「Object Mask（AI 物件遮罩）」。",
+      "將滑鼠游標移到畫面中的人物、汽車或商品上，AI 會即時框出紫色邊緣預覽，點一下即可建立遮罩。",
+      "搭配 Lumetri Color，你可以單獨將主角提亮 0.5 格曝光，或反轉遮罩 (Invert) 將背景壓暗營造立體電影感！",
     ],
     terms: [
-      { zh: 'AI 物件遮罩', en: 'Object Mask Tool' },
-      { zh: '雙向自動追蹤', en: 'Track Selected Mask Forward/Backward' },
-      { zh: '反轉遮罩區域', en: 'Invert Mask' }
-    ]
+      { zh: "AI 物件遮罩", en: "Object Mask Tool" },
+      { zh: "雙向自動追蹤", en: "Track Selected Mask Forward/Backward" },
+      { zh: "反轉遮罩區域", en: "Invert Mask" },
+    ],
   },
   {
-    id: 'media-intelligence',
-    badge: '百支毛片一秒找鏡頭 · 本機 AI',
-    titleEn: 'Media Intelligence & Visual Search',
-    titleZh: 'AI 媒體智慧語意搜尋（找畫面不用記檔名）',
-    uiLocation: 'Project Panel / Media Browser 頂部 AI 搜尋框',
-    summary: '去旅遊拍了 300 個 `C0001.MP4 ~ C0300.MP4` 檔案，想找某個「主角在喝咖啡微笑」或「特寫無人機空拍山脈」的鏡頭？2026 的 Media Intelligence 會在背景自動分析畫面內容、鏡頭焦段與收音對話，讓你直接輸入自然語言秒搜素材！',
+    id: "media-intelligence",
+    badge: "百支毛片一秒找鏡頭 · 本機 AI",
+    titleEn: "Media Intelligence & Visual Search",
+    titleZh: "AI 媒體智慧語意搜尋（找畫面不用記檔名）",
+    uiLocation: "Project Panel / Media Browser 頂部 AI 搜尋框",
+    summary:
+      "去旅遊拍了 300 個 `C0001.MP4 ~ C0300.MP4` 檔案，想找某個「主角在喝咖啡微笑」或「特寫無人機空拍山脈」的鏡頭？2026 的 Media Intelligence 會在背景自動分析畫面內容、鏡頭焦段與收音對話，讓你直接輸入自然語言秒搜素材！",
     steps: [
-      '將素材匯入 Project Panel 後，右下角會自動在背景執行本機 AI 視覺索引（完全不需上傳雲端）。',
-      '在 Project 面板頂端搜尋欄切換為「Visual（畫面語意）」或「Transcript（對話內容）」。',
-      '直接輸入關鍵字如：`close up smile`（特寫微笑）、`sunset mountain`（夕陽山景）或 `drone aerial`（空拍），對應的片段秒數區間就會直接跳出來！'
+      "將素材匯入 Project Panel 後，右下角會自動在背景執行本機 AI 視覺索引（完全不需上傳雲端）。",
+      "在 Project 面板頂端搜尋欄切換為「Visual（畫面語意）」或「Transcript（對話內容）」。",
+      "直接輸入關鍵字如：`close up smile`（特寫微笑）、`sunset mountain`（夕陽山景）或 `drone aerial`（空拍），對應的片段秒數區間就會直接跳出來！",
     ],
     terms: [
-      { zh: '媒體智慧引擎', en: 'Media Intelligence' },
-      { zh: '視覺內容語意搜尋', en: 'Visual Content Search' },
-      { zh: '鏡位景別自動辨識', en: 'Shot Type (Close-up / Wide Shot)' }
-    ]
-  }
+      { zh: "媒體智慧引擎", en: "Media Intelligence" },
+      { zh: "視覺內容語意搜尋", en: "Visual Content Search" },
+      { zh: "鏡位景別自動辨識", en: "Shot Type (Close-up / Wide Shot)" },
+    ],
+  },
 ];
 
 export default function AIWorkflows() {
@@ -1143,92 +1171,80 @@ export default function AIWorkflows() {
 
   return (
     <div className="container">
-      <div style={{ marginBottom: '1.75rem' }}>
+      <div className="ai-header">
         <span className="badge-ai-tag">Adobe Premiere Pro 2026 (v26.0) AI Powered</span>
-        <h1 style={{ fontSize: '2.1rem', marginTop: '0.6rem', marginBottom: '0.4rem' }}>
-          2026 AI 與專業實戰工作流
-        </h1>
-        <p style={{ color: 'var(--text-muted)' }}>
-          善用內建 AI 工具處理繁瑣的「聽打粗剪、停頓修剪、片尾延展與去背遮罩」，把寶貴的時間留給真正的敘事節奏與創意。
+        <h1 className="ai-title">2026 AI 與專業實戰工作流</h1>
+        <p className="page-desc">
+          善用內建 AI
+          工具處理繁瑣的「聽打粗剪、停頓修剪、片尾延展與去背遮罩」，把寶貴的時間留給真正的敘事節奏與創意。
         </p>
       </div>
 
       {/* 互動模擬器：親手體驗 Text-Based Editing 如何連動剪輯 */}
-      <div className="step-card" style={{ border: '2px solid #00b894', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+      <div className="step-card ai-demo-card">
+        <div className="ai-demo-header">
           <div>
-            <span className="cmd-en" style={{ color: '#00e6b8' }}>INTERACTIVE DEMO · TEXT-BASED EDITING</span>
-            <h3 style={{ fontSize: '1.3rem' }}>⚡ 互動體驗：2026 文字基準剪輯（一鍵消滅停頓與贅字）</h3>
+            <span className="cmd-en ai-demo-command">INTERACTIVE DEMO · TEXT-BASED EDITING</span>
+            <h3 className="ai-demo-title">⚡ 互動體驗：2026 文字基準剪輯（一鍵消滅停頓與贅字）</h3>
           </div>
           <button
             type="button"
             onClick={() => setCleanPauses(!cleanPauses)}
-            style={{
-              background: cleanPauses ? '#323239' : '#00b894',
-              color: cleanPauses ? '#fff' : '#121214',
-              border: 'none',
-              padding: '0.6rem 1.2rem',
-              borderRadius: '8px',
-              fontWeight: 800,
-              cursor: 'pointer'
-            }}
+            className={`ai-demo-toggle${cleanPauses ? " active" : ""}`}
           >
-            {cleanPauses ? '↺ 還原原始毛片 (含停頓與贅字)' : '✂️ 點擊體驗：AI 一鍵刪除所有 [停頓] 與 [贅字]'}
+            {cleanPauses
+              ? "↺ 還原原始毛片 (含停頓與贅字)"
+              : "✂️ 點擊體驗：AI 一鍵刪除所有 [停頓] 與 [贅字]"}
           </button>
         </div>
 
-        <div className="ui-diagram-box" style={{ margin: 0 }}>
-          <div style={{ marginBottom: '0.6rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+        <div className="ui-diagram-box ai-transcript-box">
+          <div className="ai-transcript-label">
             📝 <strong>Text Panel (Transcript 逐字稿視窗)</strong>：
           </div>
           {!cleanPauses ? (
-            <div style={{ fontSize: '0.95rem', lineHeight: '1.8' }}>
-              <span style={{ background: 'rgba(255, 100, 100, 0.25)', color: '#ff9999', padding: '2px 6px', borderRadius: '4px' }}>[ ... 2.4秒 空白停頓 ... ]</span>{' '}
-              大家好！歡迎來到我的頻道，{' '}
-              <span style={{ background: 'rgba(255, 184, 77, 0.25)', color: '#ffb84d', padding: '2px 6px', borderRadius: '4px' }}>呃...那個...</span>{' '}
-              今天要跟大家分享 Premiere Pro 2026 最新的剪輯技巧，{' '}
-              <span style={{ background: 'rgba(255, 100, 100, 0.25)', color: '#ff9999', padding: '2px 6px', borderRadius: '4px' }}>[ ... 1.8秒 低頭看稿停頓 ... ]</span>{' '}
+            <div className="ai-transcript-text">
+              <span className="ai-pause-mark">[ ... 2.4秒 空白停頓 ... ]</span>{" "}
+              大家好！歡迎來到我的頻道， <span className="ai-filler-mark">呃...那個...</span>{" "}
+              今天要跟大家分享 Premiere Pro 2026 最新的剪輯技巧，{" "}
+              <span className="ai-pause-mark">[ ... 1.8秒 低頭看稿停頓 ... ]</span>{" "}
               只要學會這招，粗剪速度直接快三倍！
             </div>
           ) : (
-            <div style={{ fontSize: '0.95rem', lineHeight: '1.8', color: '#00e6b8', fontWeight: 600 }}>
-              ✨ 大家好！歡迎來到我的頻道，今天要跟大家分享 Premiere Pro 2026 最新的剪輯技巧，只要學會這招，粗剪速度直接快三倍！（已自動完成 3 處波紋切割，省下 4.8 秒廢片！）
+            <div className="ai-transcript-text ai-transcript-text-clean">
+              ✨ 大家好！歡迎來到我的頻道，今天要跟大家分享 Premiere Pro 2026
+              最新的剪輯技巧，只要學會這招，粗剪速度直接快三倍！（已自動完成 3 處波紋切割，省下 4.8
+              秒廢片！）
             </div>
           )}
 
-          <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #2e2e3a', fontSize: '0.8rem' }}>
+          <div className="ai-timeline-summary">
             🎬 <strong>對應 Timeline 時間軸變化</strong>：<br />
             {!cleanPauses
-              ? 'V1/A1: [ 空白 2.4s | 大家好... | 呃那個 | 今天要... | 空白 1.8s | 只要學會... ] (總長 14.2 秒，節奏拖沓)'
-              : 'V1/A1: [ 大家好... ]|[ 今天要... ]|[ 只要學會... ] (總長 9.4 秒，零空隙緊湊成片！)'}
+              ? "V1/A1: [ 空白 2.4s | 大家好... | 呃那個 | 今天要... | 空白 1.8s | 只要學會... ] (總長 14.2 秒，節奏拖沓)"
+              : "V1/A1: [ 大家好... ]|[ 今天要... ]|[ 只要學會... ] (總長 9.4 秒，零空隙緊湊成片！)"}
           </div>
         </div>
       </div>
 
       {/* 四大 AI 功能詳解卡片 */}
-      <div className="shortcut-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))' }}>
+      <div className="shortcut-grid ai-feature-grid">
         {AI_FEATURES_2026.map((feat) => (
-          <div key={feat.id} className="shortcut-card" style={{ padding: '1.5rem' }}>
+          <div key={feat.id} className="shortcut-card ai-feature-card">
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+              <div className="ai-feature-header">
                 <span className="cmd-en">{feat.titleEn}</span>
                 <span className="badge-ai-tag">{feat.badge}</span>
               </div>
 
-              <h2 style={{ fontSize: '1.35rem', marginBottom: '0.4rem' }}>{feat.titleZh}</h2>
-              <div style={{ fontSize: '0.82rem', color: '#ffb84d', fontFamily: 'monospace', marginBottom: '0.85rem' }}>
-                🧭 面板位置：{feat.uiLocation}
-              </div>
+              <h2 className="ai-feature-title">{feat.titleZh}</h2>
+              <div className="ai-feature-location">🧭 面板位置：{feat.uiLocation}</div>
 
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: '1rem' }}>
-                {feat.summary}
-              </p>
+              <p className="ai-feature-summary">{feat.summary}</p>
 
-              <div style={{ background: '#18181c', padding: '1rem', borderRadius: '8px', marginBottom: '1rem' }}>
-                <strong style={{ fontSize: '0.85rem', color: '#fff', display: 'block', marginBottom: '0.5rem' }}>
-                  🛠️ 實戰操作步驟：
-                </strong>
-                <ol style={{ paddingLeft: '1.2rem', fontSize: '0.88rem', color: '#d0d0e0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <div className="ai-steps-box">
+                <strong className="ai-steps-title">🛠️ 實戰操作步驟：</strong>
+                <ol className="ai-steps-list">
                   {feat.steps.map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
@@ -1237,10 +1253,8 @@ export default function AIWorkflows() {
             </div>
 
             <div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-                📌 相關英文介面詞彙：
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+              <div className="ai-terms-label">📌 相關英文介面詞彙：</div>
+              <div className="ai-terms-list">
                 {feat.terms.map((t, idx) => (
                   <BilingualTag key={idx} zh={t.zh} en={t.en} />
                 ))}
@@ -1256,65 +1270,39 @@ export default function AIWorkflows() {
 
 <file path="src/pages/Home.jsx">
 // src/pages/Home.jsx
-import { Link } from 'react-router-dom';
-import Keybd from '../components/ui/Keybd';
+import { Link } from "react-router-dom";
+import Keybd from "../components/ui/Keybd";
 
 export default function Home() {
   return (
     <div className="container">
       {/* Hero 區塊 */}
-      <section style={{
-        background: 'linear-gradient(135deg, #1d1d2b 0%, #16161d 100%)',
-        border: '1px solid var(--border-color)',
-        borderRadius: '16px',
-        padding: '3rem 2rem',
-        marginBottom: '2.5rem'
-      }}>
-        <span style={{
-          background: 'rgba(153, 153, 255, 0.15)',
-          color: 'var(--pr-accent)',
-          padding: '0.3rem 0.75rem',
-          borderRadius: '20px',
-          fontSize: '0.85rem',
-          fontWeight: 600
-        }}>
-          Based on Adobe Premiere Pro 2026 (v26.0 English UI)
-        </span>
-        <h1 style={{ fontSize: '2.4rem', marginTop: '1rem', marginBottom: '1rem' }}>
-          從零開始掌握現代影片剪輯與 AI 工作流
-        </h1>
-        <p style={{ color: 'var(--text-muted)', maxWidth: '720px', fontSize: '1.05rem', marginBottom: '1.75rem' }}>
-          專為初學者到進階創作者打造的互動式圖文指南。無痛跨越英文版介面門檻，熟練掌握諸如{' '}
-          <Keybd winKeys={['Q']} macKeys={['Q']} /> / <Keybd winKeys={['W']} macKeys={['W']} />{' '}
+      <section className="home-hero">
+        <span className="home-hero-badge">Based on Adobe Premiere Pro 2026 (v26.0 English UI)</span>
+        <h1 className="home-hero-title">從零開始掌握現代影片剪輯與 AI 工作流</h1>
+        <p className="home-hero-desc">
+          專為初學者到進階創作者打造的互動式圖文指南。無痛跨越英文版介面門檻，熟練掌握諸如{" "}
+          <Keybd winKeys={["Q"]} macKeys={["Q"]} /> / <Keybd winKeys={["W"]} macKeys={["W"]} />{" "}
           波紋極速粗剪、2026 全新 Properties 面板與 Text-Based Editing 文字剪輯。
         </p>
 
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <Link
-            to="/shortcuts"
-            style={{
-              background: 'var(--pr-accent)',
-              color: '#121214',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              fontWeight: 700,
-              textDecoration: 'none'
-            }}
-          >
+        <div className="home-hero-actions">
+          <Link to="/shortcuts" className="home-hero-cta">
             前往快速鍵互動中心 →
           </Link>
         </div>
       </section>
 
       {/* 三階段課綱預覽 */}
-      <h2 style={{ marginBottom: '1.25rem' }}>系統化學習路徑 (Curriculum)</h2>
+      <h2 className="section-title">系統化學習路徑 (Curriculum)</h2>
       <div className="shortcut-grid">
         <div className="shortcut-card">
           <div>
             <span className="cmd-en">LEVEL 01 · BEGINNER</span>
-            <h3 className="cmd-zh" style={{ margin: '0.4rem 0' }}>初學者篇：介面與粗剪地基</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              認識 2026 Import/Edit/Export 三大階段、Sequence 序列設定、四大核心面板，以及全新 Context-Sensitive Properties Panel（隨選屬性面板）。
+            <h3 className="cmd-zh home-level-title">初學者篇：介面與粗剪地基</h3>
+            <p className="home-level-desc">
+              認識 2026 Import/Edit/Export 三大階段、Sequence 序列設定、四大核心面板，以及全新
+              Context-Sensitive Properties Panel（隨選屬性面板）。
             </p>
           </div>
           <div className="pro-tip-box">即將更新：互動式英文介面拆解圖</div>
@@ -1323,9 +1311,10 @@ export default function Home() {
         <div className="shortcut-card">
           <div>
             <span className="cmd-en">LEVEL 02 · INTERMEDIATE</span>
-            <h3 className="cmd-zh" style={{ margin: '0.4rem 0' }}>中階進修篇：節奏、關鍵影格與調色</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              學會三點剪輯法、Keyframes 貝茲曲線緩動運鏡、Essential Sound 自動迴避背景音樂 (Auto-Ducking) 與 Lumetri Color 基礎一級調色。
+            <h3 className="cmd-zh home-level-title">中階進修篇：節奏、關鍵影格與調色</h3>
+            <p className="home-level-desc">
+              學會三點剪輯法、Keyframes 貝茲曲線緩動運鏡、Essential Sound 自動迴避背景音樂
+              (Auto-Ducking) 與 Lumetri Color 基礎一級調色。
             </p>
           </div>
           <div className="pro-tip-box">核心技能：讓影片具備商業級流暢質感</div>
@@ -1334,9 +1323,10 @@ export default function Home() {
         <div className="shortcut-card">
           <div>
             <span className="cmd-en">LEVEL 03 · 2026 AI & PRO</span>
-            <h3 className="cmd-zh" style={{ margin: '0.4rem 0' }}>進階實戰篇：AI 生成延展與文字剪輯</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              掌握 2026 必學黑科技：Text-Based Editing 語音轉文字自動砍停頓、Firefly Generative Extend 生成式補畫面，以及 Object Masking AI 智慧遮罩。
+            <h3 className="cmd-zh home-level-title">進階實戰篇：AI 生成延展與文字剪輯</h3>
+            <p className="home-level-desc">
+              掌握 2026 必學黑科技：Text-Based Editing 語音轉文字自動砍停頓、Firefly Generative
+              Extend 生成式補畫面，以及 Object Masking AI 智慧遮罩。
             </p>
           </div>
           <div className="pro-tip-box">核心技能：剪輯效率提升 300% 的現代工作流</div>
@@ -1349,23 +1339,23 @@ export default function Home() {
 
 <file path="src/pages/ShortcutsHub.jsx">
 // src/pages/ShortcutsHub.jsx
-import { useState, useMemo } from 'react';
-import { SHORTCUT_CATEGORIES, SHORTCUTS_DATA } from '../data/shortcutsData';
-import Keybd from '../components/ui/Keybd';
-import VirtualKeyboard from '../components/shortcuts/VirtualKeyboard';
-import ShortcutTable from '../components/shortcuts/ShortcutTable';
-import { useOS } from '../context/OSContext';
+import { useState, useMemo } from "react";
+import { SHORTCUT_CATEGORIES, SHORTCUTS_DATA } from "../data/shortcutsData";
+import Keybd from "../components/ui/Keybd";
+import VirtualKeyboard from "../components/shortcuts/VirtualKeyboard";
+import ShortcutTable from "../components/shortcuts/ShortcutTable";
+import { useOS } from "../context/OSContext";
 
 export default function ShortcutsHub() {
   const { os } = useOS();
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [onlyEssential, setOnlyEssential] = useState(false);
-  const [viewMode, setViewMode] = useState('card'); // 'card' | 'table'
+  const [viewMode, setViewMode] = useState("card"); // 'card' | 'table'
 
   const filteredShortcuts = useMemo(() => {
     return SHORTCUTS_DATA.filter((item) => {
-      const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
+      const matchCat = selectedCategory === "all" || item.category === selectedCategory;
       const matchEssential = !onlyEssential || item.essential;
       const q = searchQuery.toLowerCase().trim();
       const matchSearch =
@@ -1382,21 +1372,17 @@ export default function ShortcutsHub() {
 
   return (
     <div className="container">
-      <div style={{ marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>
-          Premiere Pro 2026 快速鍵互動中心
-        </h1>
-        <p style={{ color: 'var(--text-muted)' }}>
-          目前顯示系統為 <strong>{os === 'mac' ? 'macOS (Cmd / Option)' : 'Windows (Ctrl / Alt)'}</strong>。
+      <div className="shortcuts-header">
+        <h1 className="page-title">Premiere Pro 2026 快速鍵互動中心</h1>
+        <p className="page-desc">
+          目前顯示系統為{" "}
+          <strong>{os === "mac" ? "macOS (Cmd / Option)" : "Windows (Ctrl / Alt)"}</strong>。
           掌握「左手 Q / W / V / C、右手 J / K / L / 滑鼠」的雙手分工，剪輯效率可提升 3 倍以上！
         </p>
       </div>
 
       {/* 互動式虛擬鍵盤 */}
-      <VirtualKeyboard
-        activeKey={searchQuery}
-        onSelectKey={(key) => setSearchQuery(key)}
-      />
+      <VirtualKeyboard activeKey={searchQuery} onSelectKey={(key) => setSearchQuery(key)} />
 
       {/* 搜尋列、必背開關與檢視模式切換 */}
       <div className="controls-bar">
@@ -1408,26 +1394,26 @@ export default function ShortcutsHub() {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none' }}>
+        <label className="essential-toggle">
           <input
             type="checkbox"
+            className="essential-checkbox"
             checked={onlyEssential}
             onChange={(e) => setOnlyEssential(e.target.checked)}
-            style={{ width: '18px', height: '18px', accentColor: 'var(--pr-accent)' }}
           />
-          <span style={{ fontWeight: 600, color: '#ffb84d' }}>★ 只看必背核心鍵</span>
+          <span className="essential-label">★ 只看必背核心鍵</span>
         </label>
 
         <div className="os-toggle">
           <button
-            className={`os-btn ${viewMode === 'card' ? 'active' : ''}`}
-            onClick={() => setViewMode('card')}
+            className={`os-btn ${viewMode === "card" ? "active" : ""}`}
+            onClick={() => setViewMode("card")}
           >
             🗂️ 卡片檢視
           </button>
           <button
-            className={`os-btn ${viewMode === 'table' ? 'active' : ''}`}
-            onClick={() => setViewMode('table')}
+            className={`os-btn ${viewMode === "table" ? "active" : ""}`}
+            onClick={() => setViewMode("table")}
           >
             📋 表格總覽
           </button>
@@ -1439,7 +1425,7 @@ export default function ShortcutsHub() {
         {SHORTCUT_CATEGORIES.map((cat) => (
           <button
             key={cat.id}
-            className={`cat-tab ${selectedCategory === cat.id ? 'active' : ''}`}
+            className={`cat-tab ${selectedCategory === cat.id ? "active" : ""}`}
             onClick={() => setSelectedCategory(cat.id)}
           >
             {cat.name}
@@ -1447,12 +1433,12 @@ export default function ShortcutsHub() {
         ))}
       </div>
 
-      <div style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+      <div className="search-result-count">
         共找到 <strong>{filteredShortcuts.length}</strong> 個快速鍵指令
       </div>
 
       {/* 根據 viewMode 切換渲染卡片或表格 */}
-      {viewMode === 'table' ? (
+      {viewMode === "table" ? (
         <ShortcutTable items={filteredShortcuts} />
       ) : (
         <div className="shortcut-grid">
@@ -1467,18 +1453,17 @@ export default function ShortcutsHub() {
                   {item.essential && <span className="badge-essential">★ 必背核心</span>}
                 </div>
 
-                <div style={{ margin: '0.85rem 0' }}>
+                <div className="card-keys">
                   <Keybd winKeys={item.winKeys} macKeys={item.macKeys} />
                 </div>
 
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                  {item.description}
-                </p>
+                <p className="card-description">{item.description}</p>
               </div>
 
               {item.proTip && (
                 <div className="pro-tip-box">
-                  <strong>💡 實戰技巧：</strong>{item.proTip}
+                  <strong>💡 實戰技巧：</strong>
+                  {item.proTip}
                 </div>
               )}
             </div>
@@ -1492,21 +1477,21 @@ export default function ShortcutsHub() {
 
 <file path="src/pages/Tutorials.jsx">
 // src/pages/Tutorials.jsx
-import { useState, useEffect } from 'react';
-import { TUTORIALS_DATA } from '../data/tutorialsData';
-import Sidebar from '../components/layout/Sidebar';
-import BilingualTag from '../components/ui/BilingualTag';
-import Keybd from '../components/ui/Keybd';
+import { useState, useEffect } from "react";
+import { TUTORIALS_DATA } from "../data/tutorialsData";
+import Sidebar from "../components/layout/Sidebar";
+import BilingualTag from "../components/ui/BilingualTag";
+import Keybd from "../components/ui/Keybd";
 
 export default function Tutorials() {
   const [activeId, setActiveId] = useState(TUTORIALS_DATA[0].id);
   const [completedIds, setCompletedIds] = useState(() => {
-    const saved = localStorage.getItem('pr_guide_completed_chapters');
+    const saved = localStorage.getItem("pr_guide_completed_chapters");
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem('pr_guide_completed_chapters', JSON.stringify(completedIds));
+    localStorage.setItem("pr_guide_completed_chapters", JSON.stringify(completedIds));
   }, [completedIds]);
 
   const currentIndex = TUTORIALS_DATA.findIndex((ch) => ch.id === activeId);
@@ -1515,18 +1500,16 @@ export default function Tutorials() {
 
   const toggleComplete = (id) => {
     setCompletedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
   return (
     <div className="container">
-      <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="tutorials-header">
         <div>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.35rem' }}>
-            Premiere Pro 2026 分級圖文實戰課綱
-          </h1>
-          <p style={{ color: 'var(--text-muted)' }}>
+          <h1 className="tutorials-title">Premiere Pro 2026 分級圖文實戰課綱</h1>
+          <p className="page-desc">
             從建立正確的序列地基到中進階調色混音，搭配英文版介面路徑與鍵盤快速鍵一步步實作。
           </p>
         </div>
@@ -1542,39 +1525,34 @@ export default function Tutorials() {
           activeChapterId={activeId}
           onSelectChapter={(id) => {
             setActiveId(id);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         />
 
         {/* 右側圖文教學內容區 */}
         <div>
           {/* 章節標題卡 */}
-          <div className="step-card" style={{ borderTop: '3px solid var(--pr-accent)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <span className="cmd-en" style={{ fontSize: '0.95rem' }}>
+          <div className="step-card chapter-card">
+            <div className="chapter-meta">
+              <span className="cmd-en chapter-meta-command">
                 {chapter.chapterCode} · 預計閱讀與實作：{chapter.readTime}
               </span>
               <button
                 type="button"
-                className={`os-btn ${isCompleted ? 'active' : ''}`}
-                style={{ border: '1px solid var(--border-color)' }}
+                className={`os-btn chapter-complete-btn ${isCompleted ? "active" : ""}`}
                 onClick={() => toggleComplete(chapter.id)}
               >
-                {isCompleted ? '✅ 本章已學會' : '☐ 標記本章為已學會'}
+                {isCompleted ? "✅ 本章已學會" : "☐ 標記本章為已學會"}
               </button>
             </div>
 
-            <h2 style={{ fontSize: '1.65rem', marginBottom: '0.4rem' }}>{chapter.title}</h2>
-            <p style={{ color: 'var(--pr-accent)', fontWeight: 600, marginBottom: '1rem' }}>
-              {chapter.subtitle}
-            </p>
-            <p style={{ color: '#d0d0e0', marginBottom: '1.25rem' }}>{chapter.summary}</p>
+            <h2 className="chapter-title">{chapter.title}</h2>
+            <p className="chapter-subtitle">{chapter.subtitle}</p>
+            <p className="chapter-summary">{chapter.summary}</p>
 
             <div>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.4rem' }}>
-                📌 本章核心中英術語對照：
-              </span>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              <span className="chapter-terms-label">📌 本章核心中英術語對照：</span>
+              <div className="chapter-terms-list">
                 {chapter.keyTerms.map((t, idx) => (
                   <BilingualTag key={idx} zh={t.zh} en={t.en} />
                 ))}
@@ -1585,55 +1563,55 @@ export default function Tutorials() {
           {/* 步驟詳解列表 */}
           {chapter.steps.map((step, sIdx) => (
             <div key={sIdx} className="step-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div className="step-header">
                 <span className="step-number-badge">STEP 0{sIdx + 1}</span>
-                <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: '#ffb84d' }}>
-                  🧭 英文介面路徑：{step.uiPath}
-                </span>
+                <span className="step-uipath">🧭 英文介面路徑：{step.uiPath}</span>
               </div>
 
-              <h3 style={{ fontSize: '1.25rem', margin: '0.4rem 0 0.75rem' }}>{step.stepTitle}</h3>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '0.75rem' }}>{step.content}</p>
+              <h3 className="step-title">{step.stepTitle}</h3>
+              <p className="step-content">{step.content}</p>
 
               {/* 視覺化圖解框 */}
               {step.diagram && <div className="ui-diagram-box">{step.diagram}</div>}
 
               {/* 搭配快速鍵 */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.75rem' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>⌨️ 搭配快速鍵：</span>
+              <div className="step-shortcut-row">
+                <span className="step-shortcut-label">⌨️ 搭配快速鍵：</span>
                 <Keybd winKeys={step.winKeys} macKeys={step.macKeys} />
               </div>
             </div>
           ))}
 
           {/* 課後實戰任務 */}
-          <div className="pro-tip-box" style={{ padding: '1.25rem', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-            <strong style={{ color: '#ffb84d', display: 'block', marginBottom: '0.35rem', fontSize: '1.05rem' }}>
+          <div className="pro-tip-box chapter-practice-box">
+            <strong className="chapter-practice-title">
               🎯 動手實戰練習 (Hands-on Challenge)：
             </strong>
             {chapter.practiceTask}
           </div>
 
           {/* 上一章 / 下一章導覽按鈕 */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+          <div className="chapter-nav">
             {currentIndex > 0 ? (
               <button
                 className="cat-tab"
                 onClick={() => {
                   setActiveId(TUTORIALS_DATA[currentIndex - 1].id);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
                 ← 上一章：{TUTORIALS_DATA[currentIndex - 1].chapterCode}
               </button>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
 
             {currentIndex < TUTORIALS_DATA.length - 1 && (
               <button
                 className="cat-tab active"
                 onClick={() => {
                   setActiveId(TUTORIALS_DATA[currentIndex + 1].id);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
                 下一章：{TUTORIALS_DATA[currentIndex + 1].chapterCode} →
@@ -1647,153 +1625,316 @@ export default function Tutorials() {
 }
 </file>
 
+<file path="src/main.jsx">
+// src/main.jsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.jsx";
+
+createRoot(document.getElementById("app")).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);
+</file>
+
+<file path=".gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+!.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# dotenv environment variable files
+.env
+.env.*
+!.env.example
+</file>
+
+<file path="AGENTS.md">
+<!--VITE PLUS START-->
+
+# Using Vite+, the Unified Toolchain for the Web
+
+This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
+
+Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
+
+## Built-in Commands vs Scripts
+
+`vp <name>` runs a built-in command. `vp run <name>` runs a `package.json` script or a `vite.config.ts` task. Scripts cannot overwrite built-ins, so `vp dev` and `vp run dev` may do different things. Check `package.json` and `vite.config.ts` first, and run `vp run <name>` when the project defines a script or task with that name.
+
+## Tool Versions
+
+Run `vp toolchain` to show versions and relationships in the active Vite+
+release. Add a tool name to select part of the graph. For example, run
+`vp toolchain vite`. Use `--global` to ignore the local `vite-plus` package. Use
+`vp why <package>` to show the package-manager dependency graph.
+
+## Review Checklist
+
+- [ ] Run `vp install` after pulling remote changes and before getting started.
+- [ ] Run `vp check` and `vp test` to format, lint, type check and test changes.
+- [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
+- [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
+
+<!--VITE PLUS END-->
+</file>
+
+<file path="package.json">
+{
+  "name": "premiere_2026",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "tsc && vp build",
+    "preview": "vp preview",
+    "prepare": "vp config"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "~6.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.14.0",
+      "onFail": "download"
+    }
+  }
+}
+</file>
+
+<file path="pnpm-workspace.yaml">
+catalog:
+  vite: npm:@voidzero-dev/vite-plus-core@1.1.0
+  vite-plus: 1.1.0
+overrides:
+  vite@*: "catalog:"
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: "*"
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "moduleDetection": "force",
+    "noEmit": true
+  },
+  "include": ["src"]
+}
+</file>
+
 <file path="src/pages/WorkspaceGuide.jsx">
 // src/pages/WorkspaceGuide.jsx
-import { useState } from 'react';
-import BilingualTag from '../components/ui/BilingualTag';
-import UIHotspot from '../components/ui/UIHotspot';
-import Keybd from '../components/ui/Keybd';
+import { useState } from "react";
+import BilingualTag from "../components/ui/BilingualTag";
+import UIHotspot from "../components/ui/UIHotspot";
+import Keybd from "../components/ui/Keybd";
 
 const WORKSPACE_PANELS = [
   {
-    id: 'header',
+    id: "header",
     number: 1,
-    nameEn: 'Header Bar (Import / Edit / Export)',
-    nameZh: '頂部工作流程切換列',
-    summary: 'Premiere Pro 2026 最頂端的核心導航，將剪輯流程濃縮為三大階段，以及右側的 Workspaces（工作區佈局）切換選單。',
+    nameEn: "Header Bar (Import / Edit / Export)",
+    nameZh: "頂部工作流程切換列",
+    summary:
+      "Premiere Pro 2026 最頂端的核心導航，將剪輯流程濃縮為三大階段，以及右側的 Workspaces（工作區佈局）切換選單。",
     keyTerms: [
-      { zh: '匯入模式', en: 'Import Mode' },
-      { zh: '剪輯模式', en: 'Edit Mode' },
-      { zh: '匯出模式', en: 'Export Mode' },
-      { zh: '工作區預設集', en: 'Workspaces (Essentials / Vertical)' }
+      { zh: "匯入模式", en: "Import Mode" },
+      { zh: "剪輯模式", en: "Edit Mode" },
+      { zh: "匯出模式", en: "Export Mode" },
+      { zh: "工作區預設集", en: "Workspaces (Essentials / Vertical)" },
     ],
     shortcuts: [
-      { label: '匯入媒體', win: ['Ctrl', 'I'], mac: ['Cmd', 'I'] },
-      { label: '進入匯出面板', win: ['Ctrl', 'M'], mac: ['Cmd', 'M'] }
+      { label: "匯入媒體", win: ["Ctrl", "I"], mac: ["Cmd", "I"] },
+      { label: "進入匯出面板", win: ["Ctrl", "M"], mac: ["Cmd", "M"] },
     ],
-    beginnerTip: '如果弄亂了面板位置，隨時點擊右上角 Workspaces 圖示 → 選擇「Reset to Saved Layout」即可一鍵恢復整齊介面！'
+    beginnerTip:
+      "如果弄亂了面板位置，隨時點擊右上角 Workspaces 圖示 → 選擇「Reset to Saved Layout」即可一鍵恢復整齊介面！",
   },
   {
-    id: 'source',
+    id: "source",
     number: 2,
-    nameEn: 'Source Monitor & Effect Controls',
-    nameZh: '來源預覽視窗 ＆ 效果控制項',
-    summary: '左上方區域。Source Monitor 用於在把毛片放進時間軸前，先預覽並用 I / O 抓出精華片段；切換頁籤則可進入 Effect Controls 設定關鍵影格 (Keyframes)。',
+    nameEn: "Source Monitor & Effect Controls",
+    nameZh: "來源預覽視窗 ＆ 效果控制項",
+    summary:
+      "左上方區域。Source Monitor 用於在把毛片放進時間軸前，先預覽並用 I / O 抓出精華片段；切換頁籤則可進入 Effect Controls 設定關鍵影格 (Keyframes)。",
     keyTerms: [
-      { zh: '標記入點', en: 'Mark In' },
-      { zh: '標記出點', en: 'Mark Out' },
-      { zh: '僅拖曳影像 / 音訊', en: 'Drag Video Only / Audio Only' },
-      { zh: '效果控制與關鍵影格', en: 'Effect Controls (Motion / Opacity)' }
+      { zh: "標記入點", en: "Mark In" },
+      { zh: "標記出點", en: "Mark Out" },
+      { zh: "僅拖曳影像 / 音訊", en: "Drag Video Only / Audio Only" },
+      { zh: "效果控制與關鍵影格", en: "Effect Controls (Motion / Opacity)" },
     ],
     shortcuts: [
-      { label: '標記入點 / 出點', win: ['I', 'O'], mac: ['I', 'O'] },
-      { label: '插入 / 覆蓋至時間軸', win: [',', '.'], mac: [',', '.'] }
+      { label: "標記入點 / 出點", win: ["I", "O"], mac: ["I", "O"] },
+      { label: "插入 / 覆蓋至時間軸", win: [",", "."], mac: [",", "."] },
     ],
-    beginnerTip: '在 Project 面板「連點兩下」任何影片素材，就會送到 Source Monitor 預覽，養成先在這裡挑片段再放進時間軸的好習慣！'
+    beginnerTip:
+      "在 Project 面板「連點兩下」任何影片素材，就會送到 Source Monitor 預覽，養成先在這裡挑片段再放進時間軸的好習慣！",
   },
   {
-    id: 'program',
+    id: "program",
     number: 3,
-    nameEn: 'Program Monitor',
-    nameZh: '節目預覽視窗（最終成片畫面）',
-    summary: '正上方偏中區域，即時顯示目前下方的 Timeline（時間軸）剪輯出來的最終畫面。2026 版支援直接在畫面上選取文字、調整物件位置與使用 AI Object Masking。',
+    nameEn: "Program Monitor",
+    nameZh: "節目預覽視窗（最終成片畫面）",
+    summary:
+      "正上方偏中區域，即時顯示目前下方的 Timeline（時間軸）剪輯出來的最終畫面。2026 版支援直接在畫面上選取文字、調整物件位置與使用 AI Object Masking。",
     keyTerms: [
-      { zh: '預覽解析度', en: 'Playback Resolution (Full / 1/2 / 1/4)' },
-      { zh: '安全框與參考線', en: 'Safe Margins / Rulers & Guides' },
-      { zh: '比較檢視（調色對照）', en: 'Comparison View' }
+      { zh: "預覽解析度", en: "Playback Resolution (Full / 1/2 / 1/4)" },
+      { zh: "安全框與參考線", en: "Safe Margins / Rulers & Guides" },
+      { zh: "比較檢視（調色對照）", en: "Comparison View" },
     ],
     shortcuts: [
-      { label: '全螢幕純畫面預覽', win: ['Ctrl', '`'], mac: ['Ctrl', '`'] },
-      { label: '播放 / 暫停', win: ['Space'], mac: ['Space'] }
+      { label: "全螢幕純畫面預覽", win: ["Ctrl", "`"], mac: ["Ctrl", "`"] },
+      { label: "播放 / 暫停", win: ["Space"], mac: ["Space"] },
     ],
-    beginnerTip: '如果剪 4K 影片覺得播放卡頓，把 Program Monitor 右下角的「Full」改成「1/2」或「1/4」，只會降低預覽畫質，完全不影響匯出成片畫質！'
+    beginnerTip:
+      "如果剪 4K 影片覺得播放卡頓，把 Program Monitor 右下角的「Full」改成「1/2」或「1/4」，只會降低預覽畫質，完全不影響匯出成片畫質！",
   },
   {
-    id: 'properties',
+    id: "properties",
     number: 4,
-    nameEn: 'Properties Panel & Text Panel (2026 核心)',
-    nameZh: '2026 智慧屬性面板 ＆ AI 文字轉錄面板',
-    summary: '右側區域。Properties Panel 是 2026 版最重要的革新！它會根據你在時間軸點選的是「影片、文字、音訊或轉場」，自動切換顯示最常用的調整參數，免去翻找深層選單的痛苦。',
+    nameEn: "Properties Panel & Text Panel (2026 核心)",
+    nameZh: "2026 智慧屬性面板 ＆ AI 文字轉錄面板",
+    summary:
+      "右側區域。Properties Panel 是 2026 版最重要的革新！它會根據你在時間軸點選的是「影片、文字、音訊或轉場」，自動切換顯示最常用的調整參數，免去翻找深層選單的痛苦。",
     keyTerms: [
-      { zh: '隨選智慧屬性', en: 'Context-Sensitive Properties' },
-      { zh: '快速裁切與縮放', en: 'Transform & Quick Crop' },
-      { zh: 'AI 語音轉文字剪輯', en: 'Text Panel (Transcript & Captions)' },
-      { zh: 'Lumetri 調色面板', en: 'Lumetri Color' }
+      { zh: "隨選智慧屬性", en: "Context-Sensitive Properties" },
+      { zh: "快速裁切與縮放", en: "Transform & Quick Crop" },
+      { zh: "AI 語音轉文字剪輯", en: "Text Panel (Transcript & Captions)" },
+      { zh: "Lumetri 調色面板", en: "Lumetri Color" },
     ],
     shortcuts: [
-      { label: '選取播放頭所在片段並喚醒屬性', win: ['D'], mac: ['D'] },
-      { label: '新增文字圖層', win: ['Ctrl', 'T'], mac: ['Cmd', 'T'] }
+      { label: "選取播放頭所在片段並喚醒屬性", win: ["D"], mac: ["D"] },
+      { label: "新增文字圖層", win: ["Ctrl", "T"], mac: ["Cmd", "T"] },
     ],
-    beginnerTip: '以前改字體要去 Essential Graphics、改大小要去 Effect Controls；現在在 2026 版只要點一下片段，全部都在右邊的 Properties 面板一次搞定！'
+    beginnerTip:
+      "以前改字體要去 Essential Graphics、改大小要去 Effect Controls；現在在 2026 版只要點一下片段，全部都在右邊的 Properties 面板一次搞定！",
   },
   {
-    id: 'project',
+    id: "project",
     number: 5,
-    nameEn: 'Project Panel / Media Browser / Effects',
-    nameZh: '專案素材庫 ＆ 效果庫',
-    summary: '左下角區域，像你的食材倉庫。存放所有匯入的影片、音樂、序列 (Sequences) 與資料夾 (Bins)。2026 版更內建 Media Intelligence，可直接輸入「海邊夕陽」或「笑臉」用 AI 搜尋素材畫面！',
+    nameEn: "Project Panel / Media Browser / Effects",
+    nameZh: "專案素材庫 ＆ 效果庫",
+    summary:
+      "左下角區域，像你的食材倉庫。存放所有匯入的影片、音樂、序列 (Sequences) 與資料夾 (Bins)。2026 版更內建 Media Intelligence，可直接輸入「海邊夕陽」或「笑臉」用 AI 搜尋素材畫面！",
     keyTerms: [
-      { zh: '分類資料夾', en: 'Bins (Folders)' },
-      { zh: '時間軸序列', en: 'Sequence' },
-      { zh: '2026 AI 畫面語意搜尋', en: 'Media Intelligence Search' },
-      { zh: '視訊與音訊特效庫', en: 'Effects & Transitions' }
+      { zh: "分類資料夾", en: "Bins (Folders)" },
+      { zh: "時間軸序列", en: "Sequence" },
+      { zh: "2026 AI 畫面語意搜尋", en: "Media Intelligence Search" },
+      { zh: "視訊與音訊特效庫", en: "Effects & Transitions" },
     ],
     shortcuts: [
-      { label: '建立新序列 (Sequence)', win: ['Ctrl', 'N'], mac: ['Cmd', 'N'] },
-      { label: '放大游標所在面板', win: ['` (波浪鍵)'], mac: ['` (波浪鍵)'] }
+      { label: "建立新序列 (Sequence)", win: ["Ctrl", "N"], mac: ["Cmd", "N"] },
+      { label: "放大游標所在面板", win: ["` (波浪鍵)"], mac: ["` (波浪鍵)"] },
     ],
-    beginnerTip: '強烈建議一開專案就建立 4 個 Bins 資料夾：01_Footage (毛片)、02_Audio (音樂音效)、03_Graphics (字卡圖片)、04_Sequences (序列)。'
+    beginnerTip:
+      "強烈建議一開專案就建立 4 個 Bins 資料夾：01_Footage (毛片)、02_Audio (音樂音效)、03_Graphics (字卡圖片)、04_Sequences (序列)。",
   },
   {
-    id: 'tools',
+    id: "tools",
     number: 6,
-    nameEn: 'Tools Panel (含 Generative Extend)',
-    nameZh: '剪輯工具箱',
-    summary: '位於時間軸左側的直立工具列。包含選取 (V)、剃刀 (C)、波紋編輯 (B)、滑動工具 (Y) 以及 2026 全新的 Firefly AI 生成式延展工具 (Generative Extend Tool)。',
+    nameEn: "Tools Panel (含 Generative Extend)",
+    nameZh: "剪輯工具箱",
+    summary:
+      "位於時間軸左側的直立工具列。包含選取 (V)、剃刀 (C)、波紋編輯 (B)、滑動工具 (Y) 以及 2026 全新的 Firefly AI 生成式延展工具 (Generative Extend Tool)。",
     keyTerms: [
-      { zh: '選取工具', en: 'Selection Tool (V)' },
-      { zh: '剃刀切割工具', en: 'Razor Tool (C)' },
-      { zh: '向後全選軌道', en: 'Track Select Forward (A)' },
-      { zh: 'AI 生成式延展工具', en: 'Generative Extend Tool (2026 AI)' }
+      { zh: "選取工具", en: "Selection Tool (V)" },
+      { zh: "剃刀切割工具", en: "Razor Tool (C)" },
+      { zh: "向後全選軌道", en: "Track Select Forward (A)" },
+      { zh: "AI 生成式延展工具", en: "Generative Extend Tool (2026 AI)" },
     ],
     shortcuts: [
-      { label: '切換回選取工具', win: ['V'], mac: ['V'] },
-      { label: '切換剃刀工具', win: ['C'], mac: ['C'] }
+      { label: "切換回選取工具", win: ["V"], mac: ["V"] },
+      { label: "切換剃刀工具", win: ["C"], mac: ["C"] },
     ],
-    beginnerTip: '滑鼠移到工具圖示上長按左鍵，會展開隱藏的子工具選單（例如 Ripple Edit 下方藏著 Rolling Edit 與 Generative Extend）。'
+    beginnerTip:
+      "滑鼠移到工具圖示上長按左鍵，會展開隱藏的子工具選單（例如 Ripple Edit 下方藏著 Rolling Edit 與 Generative Extend）。",
   },
   {
-    id: 'timeline',
+    id: "timeline",
     number: 7,
-    nameEn: 'Timeline Panel (Sequences & Tracks)',
-    nameZh: '時間軸與多軌剪輯區（主戰場）',
-    summary: '右下角最寬廣的工作區。以藍色分隔線為界：上半部 V1, V2, V3 為影像軌（越上層會蓋住越下層，像 Photoshop 圖層）；下半部 A1, A2, A3 為音訊軌（所有軌道聲音會混合一起播放）。',
+    nameEn: "Timeline Panel (Sequences & Tracks)",
+    nameZh: "時間軸與多軌剪輯區（主戰場）",
+    summary:
+      "右下角最寬廣的工作區。以藍色分隔線為界：上半部 V1, V2, V3 為影像軌（越上層會蓋住越下層，像 Photoshop 圖層）；下半部 A1, A2, A3 為音訊軌（所有軌道聲音會混合一起播放）。",
     keyTerms: [
-      { zh: '藍色播放頭', en: 'Playhead (Current Time Indicator)' },
-      { zh: '視訊軌 / 音訊軌', en: 'Video Tracks (V1~Vn) / Audio Tracks (A1~An)' },
-      { zh: '磁吸對齊功能', en: 'Snap in Timeline (S)' },
-      { zh: '鎖定軌道 / 隱藏軌道', en: 'Toggle Track Lock / Toggle Track Output (眼睛圖示)' }
+      { zh: "藍色播放頭", en: "Playhead (Current Time Indicator)" },
+      { zh: "視訊軌 / 音訊軌", en: "Video Tracks (V1~Vn) / Audio Tracks (A1~An)" },
+      { zh: "磁吸對齊功能", en: "Snap in Timeline (S)" },
+      { zh: "鎖定軌道 / 隱藏軌道", en: "Toggle Track Lock / Toggle Track Output (眼睛圖示)" },
     ],
     shortcuts: [
-      { label: '播放頭位置切一刀', win: ['Ctrl', 'K'], mac: ['Cmd', 'K'] },
-      { label: '極速波紋砍頭 / 砍尾', win: ['Q', 'W'], mac: ['Q', 'W'] }
+      { label: "播放頭位置切一刀", win: ["Ctrl", "K"], mac: ["Cmd", "K"] },
+      { label: "極速波紋砍頭 / 砍尾", win: ["Q", "W"], mac: ["Q", "W"] },
     ],
-    beginnerTip: '萬一剪輯時拉動片段卻不會自動吸附對齊切點，代表你不小心按到「S」關掉了磁鐵圖示 (Snap in Timeline)，再按一下 S 就會恢復！'
-  }
+    beginnerTip:
+      "萬一剪輯時拉動片段卻不會自動吸附對齊切點，代表你不小心按到「S」關掉了磁鐵圖示 (Snap in Timeline)，再按一下 S 就會恢復！",
+  },
 ];
 
 export default function WorkspaceGuide() {
-  const [activeId, setActiveId] = useState('properties');
+  const [activeId, setActiveId] = useState("properties");
   const currentPanel = WORKSPACE_PANELS.find((p) => p.id === activeId) || WORKSPACE_PANELS[0];
 
   return (
     <div className="container">
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>
-          Premiere Pro 2026 英文版介面互動全解析
-        </h1>
-        <p style={{ color: 'var(--text-muted)' }}>
-          點擊下方左側 <strong>「模擬介面面板 (1 ~ 7)」</strong>，右側將即時顯示該面板的英文術語對照、核心功能與自學實戰秘訣。
+      <div className="workspace-header">
+        <h1 className="page-title">Premiere Pro 2026 英文版介面互動全解析</h1>
+        <p className="page-desc">
+          點擊下方左側 <strong>「模擬介面面板 (1 ~ 7)」</strong>
+          ，右側將即時顯示該面板的英文術語對照、核心功能與自學實戰秘訣。
         </p>
       </div>
 
@@ -1802,35 +1943,31 @@ export default function WorkspaceGuide() {
         <div className="pr-window">
           {/* 1. Header Bar */}
           <div
-            className={`pr-header-bar ${activeId === 'header' ? 'selected' : ''}`}
-            onClick={() => setActiveId('header')}
+            className={`pr-header-bar ${activeId === "header" ? "selected" : ""}`}
+            onClick={() => setActiveId("header")}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <UIHotspot number={1} active={activeId === 'header'} />
-              <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>Import</span>
-              <span style={{ color: 'var(--pr-accent)', fontWeight: 800, fontSize: '0.85rem', borderBottom: '2px solid var(--pr-accent)' }}>Edit</span>
-              <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>Export</span>
+            <div className="pr-header-left">
+              <UIHotspot number={1} active={activeId === "header"} />
+              <span className="pr-header-mode">Import</span>
+              <span className="pr-header-mode-active">Edit</span>
+              <span className="pr-header-mode">Export</span>
             </div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
-              Workspaces: Essentials ▾
-            </span>
+            <span className="pr-header-workspaces">Workspaces: Essentials ▾</span>
           </div>
 
           {/* 中央與底部面板 Grid */}
           <div className="pr-workspace-grid">
             {/* 2. Source Monitor */}
             <div
-              className={`pr-panel-box ${activeId === 'source' ? 'selected' : ''}`}
-              onClick={() => setActiveId('source')}
+              className={`pr-panel-box ${activeId === "source" ? "selected" : ""}`}
+              onClick={() => setActiveId("source")}
             >
               <div className="panel-title-en">
                 <span>Source / Effect Controls</span>
-                <UIHotspot number={2} active={activeId === 'source'} />
+                <UIHotspot number={2} active={activeId === "source"} />
               </div>
-              <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', margin: 'auto 0' }}>
-                [ 粗剪預覽 & I/O 標記區 ]
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#888', display: 'flex', justifyContent: 'space-between' }}>
+              <div className="pr-source-placeholder">[ 粗剪預覽 & I/O 標記區 ]</div>
+              <div className="pr-panel-footer">
                 <span>00:00:12:08</span>
                 <span>{`{ I }   { O }   [ , ] [ . ]`}</span>
               </div>
@@ -1838,17 +1975,15 @@ export default function WorkspaceGuide() {
 
             {/* 3. Program Monitor */}
             <div
-              className={`pr-panel-box ${activeId === 'program' ? 'selected' : ''}`}
-              onClick={() => setActiveId('program')}
+              className={`pr-panel-box ${activeId === "program" ? "selected" : ""}`}
+              onClick={() => setActiveId("program")}
             >
               <div className="panel-title-en">
                 <span>Program: Sequence 01</span>
-                <UIHotspot number={3} active={activeId === 'program'} />
+                <UIHotspot number={3} active={activeId === "program"} />
               </div>
-              <div style={{ textAlign: 'center', color: '#fff', fontSize: '0.85rem', margin: 'auto 0', fontWeight: 600 }}>
-                🎬 [ 最終成片畫面預覽 ]
-              </div>
-              <div style={{ fontSize: '0.72rem', color: '#888', display: 'flex', justifyContent: 'space-between' }}>
+              <div className="pr-program-placeholder">🎬 [ 最終成片畫面預覽 ]</div>
+              <div className="pr-panel-footer">
                 <span>Fit</span>
                 <span>1/2 Resolution</span>
               </div>
@@ -1856,80 +1991,75 @@ export default function WorkspaceGuide() {
 
             {/* 4. Properties & Text Panel (跨兩列高度) */}
             <div
-              className={`pr-panel-box ${activeId === 'properties' ? 'selected' : ''}`}
-              style={{ gridRow: 'span 2' }}
-              onClick={() => setActiveId('properties')}
+              className={`pr-panel-box pr-panel-properties ${activeId === "properties" ? "selected" : ""}`}
+              onClick={() => setActiveId("properties")}
             >
               <div className="panel-title-en">
                 <span>Properties / Text</span>
-                <UIHotspot number={4} active={activeId === 'properties'} />
+                <UIHotspot number={4} active={activeId === "properties"} />
               </div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <div style={{ background: '#16161a', padding: '0.4rem', borderRadius: '4px', borderLeft: '2px solid var(--pr-accent)' }}>
-                  <strong style={{ color: '#fff', display: 'block' }}>✨ 2026 Properties</strong>
+              <div className="pr-properties-list">
+                <div className="pr-property-item pr-property-item-accent">
+                  <strong className="pr-property-title">✨ 2026 Properties</strong>
                   Transform / Scale / Crop
                 </div>
-                <div style={{ background: '#16161a', padding: '0.4rem', borderRadius: '4px' }}>
-                  <strong style={{ color: '#fff', display: 'block' }}>📝 AI Text / Captions</strong>
+                <div className="pr-property-item">
+                  <strong className="pr-property-title">📝 AI Text / Captions</strong>
                   Transcript 語音轉文字
                 </div>
-                <div style={{ background: '#16161a', padding: '0.4rem', borderRadius: '4px' }}>
-                  <strong style={{ color: '#fff', display: 'block' }}>🎨 Lumetri Color</strong>
+                <div className="pr-property-item">
+                  <strong className="pr-property-title">🎨 Lumetri Color</strong>
                   調色與音效面板
                 </div>
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--pr-accent)', textAlign: 'center' }}>
-                隨選即變上下文面板
-              </div>
+              <div className="pr-properties-caption">隨選即變上下文面板</div>
             </div>
 
             {/* 5. Project Panel */}
             <div
-              className={`pr-panel-box ${activeId === 'project' ? 'selected' : ''}`}
-              onClick={() => setActiveId('project')}
+              className={`pr-panel-box ${activeId === "project" ? "selected" : ""}`}
+              onClick={() => setActiveId("project")}
             >
               <div className="panel-title-en">
                 <span>Project / Effects</span>
-                <UIHotspot number={5} active={activeId === 'project'} />
+                <UIHotspot number={5} active={activeId === "project"} />
               </div>
-              <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
-                📁 01_Footage<br />
-                📁 02_Audio<br />
+              <div className="pr-project-tree">
+                📁 01_Footage
+                <br />📁 02_Audio
+                <br />
                 🎞️ Main_Sequence
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#00b894' }}>
-                🔍 AI Media Intelligence
-              </div>
+              <div className="pr-project-ai-search">🔍 AI Media Intelligence</div>
             </div>
-
             {/* 6 & 7. Tools + Timeline 複合區 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '48px 1fr', gap: '4px' }}>
+            <div className="pr-tools-timeline-row">
               {/* 6. Tools */}
               <div
-                className={`pr-panel-box ${activeId === 'tools' ? 'selected' : ''}`}
-                style={{ padding: '0.4rem', alignItems: 'center' }}
-                onClick={() => setActiveId('tools')}
+                className={`pr-panel-box pr-panel-tools ${activeId === "tools" ? "selected" : ""}`}
+                onClick={() => setActiveId("tools")}
               >
-                <UIHotspot number={6} active={activeId === 'tools'} />
-                <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', textAlign: 'center', lineHeight: '1.4' }}>
-                  ↖ V<br />⎯ A<br />⇄ B<br />🪒 C<br />✨ AI<br />T
+                <UIHotspot number={6} active={activeId === "tools"} />
+                <div className="pr-tools-list">
+                  ↖ V<br />⎯ A<br />⇄ B<br />🪒 C<br />✨ AI
+                  <br />T
                 </div>
               </div>
 
               {/* 7. Timeline */}
               <div
-                className={`pr-panel-box ${activeId === 'timeline' ? 'selected' : ''}`}
-                onClick={() => setActiveId('timeline')}
+                className={`pr-panel-box ${activeId === "timeline" ? "selected" : ""}`}
+                onClick={() => setActiveId("timeline")}
               >
                 <div className="panel-title-en">
                   <span>Timeline (V1/A1)</span>
-                  <UIHotspot number={7} active={activeId === 'timeline'} />
+                  <UIHotspot number={7} active={activeId === "timeline"} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '0.7rem', fontFamily: 'monospace' }}>
-                  <div style={{ background: '#3a4a7a', padding: '2px 6px', borderRadius: '2px', color: '#fff' }}>V2: [ Graphic Title 字幕 ]</div>
-                  <div style={{ background: '#5c5ce0', padding: '3px 6px', borderRadius: '2px', color: '#fff' }}>V1: [ Clip_01.mp4 ] | [ Clip_02.mp4 ]</div>
-                  <div style={{ background: '#266b54', padding: '3px 6px', borderRadius: '2px', color: '#fff' }}>A1: 〜〜〜 語音對話波形 〜〜〜</div>
-                  <div style={{ background: '#1e5240', padding: '2px 6px', borderRadius: '2px', color: '#b8e6d4' }}>A2: 🎵 BGM_Music.mp3 (Auto-Duck)</div>
+                <div className="pr-timeline-tracks">
+                  <div className="pr-track pr-track-v2">V2: [ Graphic Title 字幕 ]</div>
+                  <div className="pr-track pr-track-v1">V1: [ Clip_01.mp4 ] | [ Clip_02.mp4 ]</div>
+                  <div className="pr-track pr-track-a1">A1: 〜〜〜 語音對話波形 〜〜〜</div>
+                  <div className="pr-track pr-track-a2">A2: 🎵 BGM_Music.mp3 (Auto-Duck)</div>
                 </div>
               </div>
             </div>
@@ -1937,39 +2067,38 @@ export default function WorkspaceGuide() {
         </div>
 
         {/* 右側：點選面板的詳細圖文說明卡片 */}
-        <div className="shortcut-card" style={{ border: '2px solid var(--pr-accent)', padding: '1.75rem' }}>
+        <div className="shortcut-card workspace-detail-card">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
+            <div className="workspace-detail-heading">
               <UIHotspot number={currentPanel.number} active={true} />
-              <span className="cmd-en" style={{ fontSize: '0.95rem' }}>{currentPanel.nameEn}</span>
+              <span className="cmd-en workspace-detail-command">{currentPanel.nameEn}</span>
             </div>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.75rem' }}>{currentPanel.nameZh}</h2>
-            <p style={{ color: '#d0d0e0', marginBottom: '1.25rem' }}>{currentPanel.summary}</p>
+            <h2 className="workspace-detail-title">{currentPanel.nameZh}</h2>
+            <p className="workspace-detail-summary">{currentPanel.summary}</p>
 
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
+            <h4 className="workspace-detail-subtitle">
               📌 面板內必認英文術語 (English UI Terms)：
             </h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.25rem' }}>
+            <div className="workspace-tag-list">
               {currentPanel.keyTerms.map((term, i) => (
                 <BilingualTag key={i} zh={term.zh} en={term.en} />
               ))}
             </div>
 
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
-              ⌨️ 此面板常用快速鍵：
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+            <h4 className="workspace-detail-subtitle">⌨️ 此面板常用快速鍵：</h4>
+            <div className="workspace-shortcut-list">
               {currentPanel.shortcuts.map((sc, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-dark)', padding: '0.5rem 0.75rem', borderRadius: '6px' }}>
-                  <span style={{ fontSize: '0.9rem' }}>{sc.label}</span>
+                <div key={i} className="workspace-shortcut-row">
+                  <span className="workspace-shortcut-label">{sc.label}</span>
                   <Keybd winKeys={sc.win} macKeys={sc.mac} />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="pro-tip-box" style={{ fontSize: '0.9rem' }}>
-            <strong>💡 給初學者的操作秘訣：</strong>{currentPanel.beginnerTip}
+          <div className="pro-tip-box workspace-tip">
+            <strong>💡 給初學者的操作秘訣：</strong>
+            {currentPanel.beginnerTip}
           </div>
         </div>
       </div>
@@ -1980,14 +2109,14 @@ export default function WorkspaceGuide() {
 
 <file path="src/App.jsx">
 // src/App.jsx
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { OSProvider } from './context/OSContext';
-import Navbar from './components/layout/Navbar';
-import Home from './pages/Home';
-import WorkspaceGuide from './pages/WorkspaceGuide';
-import Tutorials from './pages/Tutorials';
-import ShortcutsHub from './pages/ShortcutsHub';
-import AIWorkflows from './pages/AIWorkflows';
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { OSProvider } from "./context/OSContext";
+import Navbar from "./components/layout/Navbar";
+import Home from "./pages/Home";
+import WorkspaceGuide from "./pages/WorkspaceGuide";
+import Tutorials from "./pages/Tutorials";
+import ShortcutsHub from "./pages/ShortcutsHub";
+import AIWorkflows from "./pages/AIWorkflows";
 
 export default function App() {
   return (
@@ -2017,7 +2146,7 @@ export default function App() {
   --bg-card: #26262b;
   --bg-hover: #323239;
   --border-color: #383842;
-  --pr-accent: #9999ff;      /* Premiere Pro 經典淺紫藍 */
+  --pr-accent: #9999ff; /* Premiere Pro 經典淺紫藍 */
   --pr-accent-strong: #5c5ce0;
   --text-main: #f0f0f5;
   --text-muted: #9a9aa6;
@@ -2034,7 +2163,7 @@ export default function App() {
 body {
   background-color: var(--bg-dark);
   color: var(--text-main);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.6;
 }
 
@@ -2078,8 +2207,8 @@ body {
 
 .nav-links {
   display: flex;
-  justify-content: space-around;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 1rem;
   align-items: center;
   margin: 0 3px;
 }
@@ -2088,11 +2217,13 @@ body {
   color: var(--text-muted);
   text-decoration: none;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
   transition: color 0.2s;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   color: var(--pr-accent);
   font-weight: 600;
 }
@@ -2141,7 +2272,7 @@ body {
 .keybd-key {
   display: inline-block;
   padding: 0.25rem 0.6rem;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
   font-size: 0.85rem;
   font-weight: 600;
   color: #fff;
@@ -2149,7 +2280,7 @@ body {
   border: 1px solid #4e4e5a;
   border-bottom-width: 3px;
   border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   min-width: 2rem;
   text-align: center;
 }
@@ -2235,7 +2366,9 @@ body {
   flex-direction: column;
   justify-content: space-between;
   gap: 0.75rem;
-  transition: transform 0.15s, border-color 0.15s;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
 }
 
 .shortcut-card:hover {
@@ -2302,7 +2435,7 @@ body {
 }
 .bilingual-en {
   color: var(--pr-accent);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: 0.8rem;
 }
 
@@ -2321,6 +2454,7 @@ body {
 }
 
 .pr-window {
+  height: 80vh;
   background: #141417;
   border: 2px solid var(--border-color);
   border-radius: 12px;
@@ -2339,7 +2473,8 @@ body {
   transition: background 0.2s;
 }
 
-.pr-header-bar:hover, .pr-header-bar.selected {
+.pr-header-bar:hover,
+.pr-header-bar.selected {
   background: #2b2b38;
   outline: 2px solid var(--pr-accent);
 }
@@ -2402,6 +2537,7 @@ body {
   font-size: 0.75rem;
   font-weight: 800;
   box-shadow: 0 0 0 3px rgba(153, 153, 255, 0.25);
+  cursor: default;
 }
 
 /* 3. 虛擬鍵盤樣式 <VirtualKeyboard /> */
@@ -2447,7 +2583,8 @@ body {
   background: #2e2e38;
 }
 
-.vk-key.has-shortcut:hover, .vk-key.active {
+.vk-key.has-shortcut:hover,
+.vk-key.active {
   background: var(--pr-accent-strong);
   color: #fff;
   border-color: var(--pr-accent);
@@ -2477,7 +2614,8 @@ body {
   text-align: left;
 }
 
-.shortcut-table th, .shortcut-table td {
+.shortcut-table th,
+.shortcut-table td {
   padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--border-color);
 }
@@ -2591,7 +2729,7 @@ body {
   border-radius: 8px;
   padding: 1rem 1.25rem;
   margin: 1rem 0;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: 0.85rem;
   color: #c8c8e6;
   white-space: pre-wrap;
@@ -2608,85 +2746,689 @@ body {
   padding: 0.2rem 0.6rem;
   border-radius: 20px;
 }
-</file>
 
-<file path="src/main.jsx">
-// src/main.jsx
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css';
-import App from './App.jsx';
+/* === 共用頁面標題（由行內樣式統一至此） === */
+.page-title {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
 
-createRoot(document.getElementById('app')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-);
-</file>
+.page-desc {
+  color: var(--text-muted);
+}
 
-<file path=".gitignore">
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+.section-title {
+  margin-bottom: 1.25rem;
+}
 
-node_modules
-dist
-dist-ssr
-*.local
+/* === Home 首頁 === */
+.home-hero {
+  background: linear-gradient(135deg, #1d1d2b 0%, #16161d 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  margin-bottom: 2.5rem;
+}
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-!.vscode/
-!.vscode/settings.json
-!.vscode/extensions.json
+.home-hero-badge {
+  display: inline-block;
+  background: rgba(153, 153, 255, 0.15);
+  color: var(--pr-accent);
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
 
-# dotenv environment variable files
-.env
-.env.*
-!.env.example
-</file>
+.home-hero-title {
+  font-size: 2.4rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
 
-<file path="AGENTS.md">
-<!--VITE PLUS START-->
+.home-hero-desc {
+  color: var(--text-muted);
+  max-width: 720px;
+  font-size: 1.05rem;
+  margin-bottom: 1.75rem;
+}
 
-# Using Vite+, the Unified Toolchain for the Web
+.home-hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
 
-This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
+.home-hero-cta {
+  background: var(--pr-accent);
+  color: #121214;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+}
 
-Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
+.home-level-title {
+  margin: 0.4rem 0;
+}
 
-## Built-in Commands vs Scripts
+.home-level-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
 
-`vp <name>` runs a built-in command. `vp run <name>` runs a `package.json` script or a `vite.config.ts` task. Scripts cannot overwrite built-ins, so `vp dev` and `vp run dev` may do different things. Check `package.json` and `vite.config.ts` first, and run `vp run <name>` when the project defines a script or task with that name.
+/* === Sidebar 章節導覽 === */
+.sidebar-title {
+  margin-bottom: 1rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
 
-## Tool Versions
+.sidebar-chapter-code {
+  font-family: monospace;
+  color: var(--pr-accent);
+  margin-right: 0.4rem;
+}
 
-Run `vp toolchain` to show versions and relationships in the active Vite+
-release. Add a tool name to select part of the graph. For example, run
-`vp toolchain vite`. Use `--global` to ignore the local `vite-plus` package. Use
-`vp why <package>` to show the package-manager dependency graph.
+/* === ShortcutTable 表格 === */
+.shortcut-name-cell {
+  font-weight: 700;
+  min-width: 180px;
+}
 
-## Review Checklist
+.shortcut-essential-wrap {
+  margin-top: 0.25rem;
+}
 
-- [ ] Run `vp install` after pulling remote changes and before getting started.
-- [ ] Run `vp check` and `vp test` to format, lint, type check and test changes.
-- [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
-- [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
+.shortcut-command-cell {
+  font-family: monospace;
+  color: var(--pr-accent);
+  min-width: 190px;
+}
 
-<!--VITE PLUS END-->
+.shortcut-keys-cell {
+  min-width: 150px;
+}
+
+.shortcut-desc-cell {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.shortcut-protip {
+  color: #c4c4ff;
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+}
+
+/* === VirtualKeyboard 虛擬鍵盤 === */
+.vk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.vk-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--pr-accent);
+}
+
+.vk-clear-btn {
+  font-size: 0.78rem;
+}
+
+.vk-key-wide {
+  min-width: 240px;
+}
+
+/* === UIHotspot 熱點圓標狀態 === */
+.ui-hotspot-badge.clickable {
+  cursor: pointer;
+}
+
+.ui-hotspot-badge.active {
+  background: #ffb84d;
+  color: #121214;
+}
+
+/* === Keybd 按鍵組合 === */
+.keybd-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* === ShortcutsHub 快速鍵中心 === */
+.shortcuts-header {
+  margin-bottom: 1.25rem;
+}
+
+.essential-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.essential-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--pr-accent);
+}
+
+.essential-label {
+  font-weight: 600;
+  color: #ffb84d;
+}
+
+.search-result-count {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.card-keys {
+  margin: 0.85rem 0;
+}
+
+.card-description {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+/* === Tutorials 教學頁 === */
+.tutorials-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tutorials-title {
+  font-size: 2rem;
+  margin-bottom: 0.35rem;
+}
+
+.chapter-card {
+  border-top: 3px solid var(--pr-accent);
+}
+
+.chapter-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.chapter-meta-command {
+  font-size: 0.95rem;
+}
+
+.chapter-complete-btn {
+  border: 1px solid var(--border-color);
+}
+
+.chapter-title {
+  font-size: 1.65rem;
+  margin-bottom: 0.4rem;
+}
+
+.chapter-subtitle {
+  color: var(--pr-accent);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.chapter-summary {
+  color: #d0d0e0;
+  margin-bottom: 1.25rem;
+}
+
+.chapter-terms-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.chapter-terms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.step-uipath {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #ffb84d;
+}
+
+.step-title {
+  font-size: 1.25rem;
+  margin: 0.4rem 0 0.75rem;
+}
+
+.step-content {
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.step-shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.step-shortcut-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.chapter-practice-box {
+  padding: 1.25rem;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.chapter-practice-title {
+  color: #ffb84d;
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 1.05rem;
+}
+
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* === AIWorkflows 2026 AI 工作流頁 === */
+.ai-header {
+  margin-bottom: 1.75rem;
+}
+
+.ai-title {
+  font-size: 2.1rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.ai-demo-card {
+  border: 2px solid #00b894;
+  margin-bottom: 2rem;
+}
+
+.ai-demo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ai-demo-command {
+  color: #00e6b8;
+}
+
+.ai-demo-title {
+  font-size: 1.3rem;
+}
+
+.ai-demo-toggle {
+  background: #00b894;
+  color: #121214;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ai-demo-toggle.active {
+  background: #323239;
+  color: #fff;
+}
+
+.ai-transcript-box {
+  margin: 0;
+}
+
+.ai-transcript-label {
+  margin-bottom: 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.ai-transcript-text {
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.ai-pause-mark {
+  background: rgba(255, 100, 100, 0.25);
+  color: #ff9999;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.ai-filler-mark {
+  background: rgba(255, 184, 77, 0.25);
+  color: #ffb84d;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.ai-transcript-text-clean {
+  color: #00e6b8;
+  font-weight: 600;
+}
+
+.ai-timeline-summary {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #2e2e3a;
+  font-size: 0.8rem;
+}
+
+.ai-feature-grid {
+  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+}
+
+.ai-feature-card {
+  padding: 1.5rem;
+}
+
+.ai-feature-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ai-feature-title {
+  font-size: 1.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.ai-feature-location {
+  font-size: 0.82rem;
+  color: #ffb84d;
+  font-family: monospace;
+  margin-bottom: 0.85rem;
+}
+
+.ai-feature-summary {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+.ai-steps-box {
+  background: #18181c;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.ai-steps-title {
+  font-size: 0.85rem;
+  color: #fff;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.ai-steps-list {
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  color: #d0d0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ai-terms-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.ai-terms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+/* === WorkspaceGuide 介面模擬頁 === */
+.workspace-header {
+  margin-bottom: 1.5rem;
+}
+
+.pr-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pr-header-mode {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.pr-header-mode-active {
+  color: var(--pr-accent);
+  font-weight: 800;
+  font-size: 0.85rem;
+  border-bottom: 2px solid var(--pr-accent);
+}
+
+.pr-header-workspaces {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.pr-source-placeholder {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: auto 0;
+}
+
+.pr-program-placeholder {
+  text-align: center;
+  color: #fff;
+  font-size: 0.85rem;
+  margin: auto 0;
+  font-weight: 600;
+}
+
+.pr-panel-footer {
+  font-size: 0.72rem;
+  color: #888;
+  display: flex;
+  justify-content: space-between;
+}
+
+.pr-panel-properties {
+  grid-row: span 3;
+}
+
+.pr-properties-list {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.pr-property-item {
+  background: #16161a;
+  padding: 0.4rem;
+  border-radius: 4px;
+}
+
+.pr-property-item-accent {
+  border-left: 2px solid var(--pr-accent);
+}
+
+.pr-property-title {
+  color: #fff;
+  display: block;
+}
+
+.pr-properties-caption {
+  font-size: 0.72rem;
+  color: var(--pr-accent);
+  text-align: center;
+}
+
+.pr-project-tree {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.pr-project-ai-search {
+  font-size: 0.7rem;
+  color: #00b894;
+}
+
+.pr-tools-timeline-row {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 4px;
+}
+
+.pr-panel-tools {
+  margin-bottom: auto;
+  padding: 0.4rem;
+  align-items: center;
+}
+
+.pr-tools-list {
+  font-size: 0.75rem;
+  font-family: monospace;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.pr-timeline-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.7rem;
+  font-family: monospace;
+}
+
+.pr-track {
+  border-radius: 2px;
+  color: #fff;
+}
+
+.pr-track-v2 {
+  background: #3a4a7a;
+  padding: 2px 6px;
+}
+
+.pr-track-v1 {
+  background: #5c5ce0;
+  padding: 3px 6px;
+}
+
+.pr-track-a1 {
+  background: #266b54;
+  padding: 3px 6px;
+}
+
+.pr-track-a2 {
+  background: #1e5240;
+  padding: 2px 6px;
+  color: #b8e6d4;
+}
+
+.workspace-detail-card {
+  border: 2px solid var(--pr-accent);
+  padding: 1.75rem;
+}
+
+.workspace-detail-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.workspace-detail-command {
+  font-size: 0.95rem;
+}
+
+.workspace-detail-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.workspace-detail-summary {
+  color: #d0d0e0;
+  margin-bottom: 1.25rem;
+}
+
+.workspace-detail-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.workspace-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.workspace-shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.workspace-shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-dark);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.workspace-shortcut-label {
+  font-size: 0.9rem;
+}
+
+.workspace-tip {
+  font-size: 0.9rem;
+}
 </file>
 
 <file path="index.html">
@@ -2694,7 +3436,7 @@ release. Add a tool name to select part of the graph. For example, run
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Premiere Pro 2026 實戰教學網</title>
   </head>
@@ -2705,83 +3447,15 @@ release. Add a tool name to select part of the graph. For example, run
 </html>
 </file>
 
-<file path="package.json">
-{
-  "name": "premiere_2026",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vp dev",
-    "build": "tsc && vp build",
-    "preview": "vp preview",
-    "prepare": "vp config"
-  },
-  "devDependencies": {
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
-    "typescript": "~6.0.2",
-    "vite": "catalog:",
-    "vite-plus": "catalog:"
-  },
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "12.14.0",
-      "onFail": "download"
-    }
-  },
-  "dependencies": {
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.4"
-  }
-}
-</file>
-
-<file path="pnpm-workspace.yaml">
-catalog:
-  vite: npm:@voidzero-dev/vite-plus-core@1.1.0
-  vite-plus: 1.1.0
-overrides:
-  vite@*: "catalog:"
-peerDependencyRules:
-  allowAny:
-    - vite
-  allowedVersions:
-    vite: "*"
-</file>
-
-<file path="tsconfig.json">
-{
-  "compilerOptions": {
-    "target": "es2023",
-    "module": "esnext",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"],
-    "jsx": "react-jsx",
-    "allowJs": true,
-    "allowArbitraryExtensions": true,
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": false,
-    "moduleDetection": "force",
-    "noEmit": true
-  },
-  "include": ["src"]
-}
-</file>
-
 <file path="vite.config.ts">
 // vite.config.ts
 import { defineConfig } from "vite-plus";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  // GitHub Pages project site: https://shernwu-creator.github.io/premiere_2026/
+  // 若之後改用自訂網域或 <user>.github.io 根網域，請改為 "/"。
+  base: "/premiere_2026/",
   plugins: [react()],
   staged: {
     "*": "vp check --fix",

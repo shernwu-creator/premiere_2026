@@ -252,4 +252,83 @@ export const TUTORIALS_DATA = [
     practiceTask:
       "將你前面練習剪好的時間軸標記好 In / Out，按 Ctrl/Cmd + M 進入匯出面板，檢查 Format 是否為 H.264，並成功輸出一支 MP4 成品影片！",
   },
-];
+  // 接在 CH 06 的後面...
+
+  {
+    id: "ch7-proxy-workflow",
+    level: "advanced",
+    chapterCode: "CH 07",
+    title: "代理檔案 (Proxy) 極速剪輯術：拯救卡頓的 4K 工作流",
+    subtitle: "讓老電腦也能順暢剪輯 10-bit 4K 甚至 8K 影片的神級技巧",
+    readTime: "12 min",
+    summary:
+      "當影片解析度越來越高（4K/8K）或使用了高壓縮格式（H.265），直接剪輯原始檔會讓電腦哀嚎卡頓。代理檔 (Proxy) 就像是給影片製作一個「低畫質輕量版分身」，剪輯時系統播放分身，匯出時會自動切換回高畫質本尊進行算圖！",
+    keyTerms: [
+      { zh: "代理檔案", en: "Proxy" },
+      { zh: "建立代理檔", en: "Create Proxies" },
+      { zh: "切換代理開關", en: "Toggle Proxies (按鈕圖示)" },
+      { zh: "高畫質原始檔", en: "Full Resolution Media" },
+    ],
+    steps: [
+      {
+        stepTitle: "步驟一：選取毛片，交給 Media Encoder 產生輕量分身",
+        uiPath: "Project Panel → 選取影片按右鍵 → Proxy → Create Proxies",
+        content:
+          "在 Project 面板把需要剪輯的 4K 影片全部框起來，按右鍵選擇「Proxy > Create Proxies」。在彈出的視窗中，Format 建議選「QuickTime」，Preset 選擇「ProRes Low Resolution Proxy」或「CineForm」。按下 OK 後，Adobe Media Encoder 會自動在背景幫你轉檔，你完全可以繼續在 Premiere 裡做其他事。",
+        diagram: `[ 🎬 原始 4K 影片 (H.265 / 檔案大 / 剪輯超卡) ]\n       ⬇ (Create Proxies)\n[ 📄 ProRes 代理分身 (720p / 檔案稍大但極度順暢) ] ── (背景轉檔中...)`,
+        winKeys: [],
+        macKeys: [],
+      },
+      {
+        stepTitle: "步驟二：在 Program 面板新增「Toggle Proxies」切換開關",
+        uiPath: "Program Monitor → 右下角 (+) Button Editor → 拖曳 Toggle Proxies",
+        content:
+          "轉檔完成後，要怎麼跟 Premiere 說「我現在要用低畫質分身剪」？點擊 Program Monitor 右下角的「+ (Button Editor)」，找到一個長得像『兩個箭頭繞著螢幕』的按鈕 (Toggle Proxies)，把它拖曳到下方的工具列中。點擊讓它變成【藍色】，畫面就會立刻切換成超級順暢的代理檔！",
+        diagram: `Program Monitor 下方工具列：\n[ ▶ ] [ ⏸ ] [ ⏭ ] ... 🔘 (灰色：播放原檔，卡頓) ➔ 🔵 (變成藍色：播放代理檔，滑順！)\n\n※ 💡 放心！就算你忘記關掉藍色按鈕，Ctrl+M 匯出時，Pr 依然會【強制使用 4K 原檔】最高畫質輸出，絕不翻車！`,
+        winKeys: [],
+        macKeys: [],
+      },
+    ],
+    practiceTask:
+      "找 3 段 4K 高畫質影片匯入專案，幫它們建立 ProRes Proxy 代理檔。試著把 Program Monitor 的 Toggle Proxies 按鈕開開關關，感受在時間軸上拖拉播放頭時的流暢度差異！",
+  },
+
+  {
+    id: "ch8-adjustment-layer",
+    level: "advanced",
+    chapterCode: "CH 08",
+    title: "調整圖層 (Adjustment Layer) 批次調色與電影黑邊",
+    subtitle: "拒絕逐一貼特效！在時間軸頂部統治全片的最高效率解法",
+    readTime: "10 min",
+    summary:
+      "如果你有 50 個剪碎的片段需要套用同一個調色風格 (LUT)，或者想在畫面上方加兩條「電影感黑邊」，一個一個片段貼特效會累死，事後要改也改不完。Adjustment Layer (調整圖層) 是一個透明圖層，放在它身上的任何特效，都會無條件套用到它【下方所有軌道】的畫面上！",
+    keyTerms: [
+      { zh: "調整圖層", en: "Adjustment Layer" },
+      { zh: "新增項目", en: "New Item (Project 面板右下角折角圖示)" },
+      { zh: "裁切特效", en: "Crop (Effects 面板)" },
+      { zh: "全局調色", en: "Global Color Grading" },
+    ],
+    steps: [
+      {
+        stepTitle: "建立 Adjustment Layer 並覆蓋整條時間軸",
+        uiPath: "Project Panel 底端 → New Item → Adjustment Layer",
+        content:
+          "在左下角 Project 面板，點擊垃圾桶旁邊的「New Item (折角圖紙)」圖示，選擇 Adjustment Layer。直接按 OK (它會自動抓取你現在 Sequence 的長寬規格)。接著，把這個透明圖層拖曳到時間軸的 V3 或最高軌道上，並往右拉長，讓它覆蓋底下所有的片段。",
+        diagram: `Timeline (時間軸疊加邏輯)：\n[ V3 軌道 ] : 🟦🟦🟦🟦🟦 [ Adjustment Layer (套用 LUT 調色 + 裁切黑邊) ] 🟦🟦🟦🟦🟦\n             ⬇ (往下貫穿影響)\n[ V2 軌道 ] : 🟨 [ B-Roll 畫面 A ] 🟨   🟨 [ B-Roll 畫面 B ] 🟨\n[ V1 軌道 ] : 🟥🟥 [ 主視角訪談畫面 1 ] 🟥🟥🟥🟥🟥 [ 主視角訪談畫面 2 ] 🟥🟥🟥`,
+        winKeys: [],
+        macKeys: [],
+      },
+      {
+        stepTitle: "一鍵套用全片電影感調色與 Crop 寬高比黑邊",
+        uiPath: "選取 Adjustment Layer → 開啟 Lumetri Color & Effects 面板",
+        content:
+          "點選 V3 軌道上的 Adjustment Layer，在右側 Properties 或是 Lumetri Color 面板中調整色溫、曝光，或套用一個電影 LUT，底下的所有畫面都會瞬間改變色調。若要加電影黑邊，在 Effects 面板搜尋「Crop (裁切)」，套用到調整圖層上，把 Top (上) 與 Bottom (下) 都設為 12%，瞬間搞定 2.35:1 寬銀幕電影感！",
+        diagram: `[ Effect Controls 面板中的 Crop 參數 ]\n  • Left   : 0.0 %\n  • Top    : 12.0 % ━━●━━━━ (製造上方黑邊)\n  • Right  : 0.0 %\n  • Bottom : 12.0 % ━━●━━━━ (製造下方黑邊)`,
+        winKeys: ["Shift", "7"],
+        macKeys: ["Shift", "7"],
+      },
+    ],
+    practiceTask:
+      "在你的專案中建立一個 Adjustment Layer，把它拉到最上層軌道。試著用 Lumetri Color 把它調成偏藍的冷色調，並加上上下各 10% 的 Crop 裁切黑邊，體會一次影響幾十個片段的極速快感！",
+  },
+]; // 注意：這裡要接上原本陣列結尾的 ];

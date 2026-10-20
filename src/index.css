@@ -225,6 +225,8 @@ body {
   flex-direction: column;
   justify-content: space-between;
   gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
   transition:
     transform 0.15s,
     border-color 0.15s;
@@ -270,8 +272,10 @@ body {
   border-left: 3px solid var(--pr-accent);
   padding: 0.5rem 0.75rem;
   font-size: 0.82rem;
-  color: #d0d0e0;
+  /* color: #d0d0e0; */
   border-radius: 0 6px 6px 0;
+  margin-top: 1rem;
+  color: var(--pr-accent);
 }
 
 /* === 追加至 src/index.css 最下方 === */
@@ -313,7 +317,8 @@ body {
 }
 
 .pr-window {
-  height: 80vh;
+  min-height: 480px;
+  height: auto;
   background: #141417;
   border: 2px solid var(--border-color);
   border-radius: 12px;
