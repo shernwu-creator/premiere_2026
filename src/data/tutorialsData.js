@@ -331,4 +331,163 @@ export const TUTORIALS_DATA = [
     practiceTask:
       "在你的專案中建立一個 Adjustment Layer，把它拉到最上層軌道。試著用 Lumetri Color 把它調成偏藍的冷色調，並加上上下各 10% 的 Crop 裁切黑邊，體會一次影響幾十個片段的極速快感！",
   },
-]; // 注意：這裡要接上原本陣列結尾的 ];
+  {
+    id: "ch9-multicam",
+    level: "advanced",
+    chapterCode: "CH 09",
+    title: "Multicam 多機位自動對齊：音訊波形同步、建立來源序列與 1/2/3 盲切",
+    subtitle: "把三機訪談從手動對位地獄，變成邊看表演邊按數字鍵的導播級剪輯",
+    readTime: "14 min",
+    summary:
+      "拍訪談、Podcast 或 Live 表演時，通常會同時用 A 機拍全景、B 機拍特寫、C 機拍側面。若把三段素材手動對位，不只要花上半小時，還很容易對到懷疑人生。Premiere 的 Multicam 會讀取每台相機的現場收音波形，自動把多機素材對齊，並包裝成一條「多機位來源序列」；你只要在播放時按 1、2、3，就能像導播一樣即時切換鏡頭，系統會自動把切點記錄成一條剪好的時間軸。",
+    keyTerms: [
+      { zh: "多機位來源序列", en: "Multi-Camera Source Sequence" },
+      { zh: "音訊波形同步", en: "Synchronize by Audio" },
+      { zh: "多機位監看模式", en: "Multi-Camera View" },
+      { zh: "切換機位／錄製剪輯", en: "Switch Camera / Record Cut" },
+    ],
+    steps: [
+      {
+        stepTitle: "前置作業：每一台相機都要留下「可對齊」的現場音",
+        uiPath: "Project Panel (Shift + 1) → 建立 03_Multicam Bin → 依 A/B/C 命名機位",
+        content:
+          "Multicam 的自動同步不是靠畫面比對，而是靠「音訊波形」。因此每一台相機最好都開著機身麥克風錄下現場聲（就算全是環境雜訊也沒關係），波形特徵越相似，Pr 對齊越準。若某台相機完全沒有音軌，就必須改用 Timecode（多機有同步時間碼時）或手動 Marker 對齊。先把所有機位放進同一個 Bin，並用 A_CAM、B_CAM、C_CAM 命名，後續在 Multi-Camera Monitor 才能一眼認出角度。",
+        diagram: `[ 多機素材 Bin 建議命名 ]
+📁 03_Multicam
+ ├── 🎥 A_CAM_Wide.mp4      (全景 / 含現場收音)
+ ├── 🎥 B_CAM_Close.mp4     (特寫 / 含現場收音)
+ └── 🎥 C_CAM_Side.mp4      (側面 / 含現場收音)
+
+[ 音訊波形自動對齊原理 ]
+A_CAM 波形 ━━╱╲━━━━╲╱━━━
+B_CAM 波形   ━━╱╲━━━━╲╱━━━  ← 波形特徵相同，Pr 會自動平移對齊
+C_CAM 波形 ━━━━╱╲━━━━╲╱━
+
+⚠️ 沒有音軌的機位無法用 Audio Sync，請改用 Timecode 或 Marker。`,
+        winKeys: ["Shift", "1"],
+        macKeys: ["Shift", "1"],
+      },
+      {
+        stepTitle: "建立多機位來源序列：Audio Sync 一鍵對齊所有角度",
+        uiPath: "Project Panel → 框選 A/B/C 機位 → 右鍵 → Create Multi-Camera Source Sequence",
+        content:
+          "框選三台機位的素材，按右鍵選 Create Multi-Camera Source Sequence。視窗中依序設定：Name 輸入 MC_Interview_3Cam；Sequence Preset 選與主機位相同的格式（例如 DSLR 1080p 30）；Synchronize Point 選 Audio；Audio Sync Offset 保持 0；Video Clip Channel 選 All Cameras。按下 OK 後，Pr 會分析每段音訊波形，把三機對齊並打包成一條多機位來源序列（本質是 Nested Sequence）。完成後可雙擊它，在 Multi-Camera Monitor 檢查每個角度是否真的同步。",
+        diagram: `[ Create Multi-Camera Source Sequence 建議參數 ]
+• Name               : MC_Interview_3Cam
+• Sequence Preset    : DSLR 1080p 30 (或與主機位一致)
+• Synchronize Point  : Audio  ← 以現場收音波形自動對齊
+• Audio Sync Offset  : 0
+• Video Clip Channel : All Cameras
+
+完成後 Project 面板會出現：
+📁 MC_Interview_3Cam (Multi-Camera Source Sequence)
+   └── 內含 A / B / C 三個角度，已依波形對齊
+
+💡 小抄：對齊不準時，先確認每個機位的音軌沒有被靜音或裁掉開頭。`,
+        winKeys: ["Shift", "1"],
+        macKeys: ["Shift", "1"],
+      },
+      {
+        stepTitle: "導播模式：用 1 / 2 / 3 盲切機位，邊看表演邊錄剪輯",
+        uiPath: "Timeline → 拖入 Multicam Sequence → Program Monitor → Multi-Camera View",
+        content:
+          "把多機位來源序列從 Project 拖到時間軸，它會變成一條可剪的 Nested Sequence。點擊 Program Monitor 下方的 Multi-Camera View 圖示，畫面會切成多格監看器；按 Shift + 4 可把鍵盤焦點移到 Program Monitor。按下空白鍵播放，眼睛盯著表演，手指放在 1、2、3 上：按哪個數字，當下就切到那個機位，Pr 會即時在時間軸上記錄切點，全程不必暫停或動滑鼠。要修正某個切點，把播放頭移到該影格再按正確的機位數字即可。若只有 A 機接麥克風，記得在 Multi-Camera 選單取消 Audio Follows Video，讓聲音固定使用 A 機，避免切機時音量忽大忽小。",
+        diagram: `[ Program Monitor：Multi-Camera View ]
+┌────────────┬────────────┐
+│ 1 A_CAM    │ 2 B_CAM    │  ← 按 1 / 2 / 3 直接切換
+│   全景     │   特寫     │
+├────────────┼────────────┤
+│ 3 C_CAM    │ 現在播出： │
+│   側面     │ 2 B_CAM    │
+└────────────┴────────────┘
+
+播放時：Space 開始 ➔ 按 1 / 2 / 3 盲切 ➔ Pr 自動記錄切點
+修正時：播放頭移到切點 ➔ 按正確數字 ➔ 切點立即更新
+
+⚠️ 按數字鍵沒反應？先點一下 Program Monitor，確認面板有取得焦點。`,
+        winKeys: ["1 ~ 3"],
+        macKeys: ["1 ~ 3"],
+      },
+    ],
+    practiceTask:
+      "用 2～3 台相機（手機也可以）同時拍一段 60 秒對話，每一台都開麥克風收音。建立 Multi-Camera Source Sequence，確認三個角度都已依 Audio 對齊；把序列拖進時間軸，練習全程不看鍵盤、只按 1/2/3 完成至少 10 個切點，最後把 A 機音訊鎖定為主要聲音。",
+  },
+
+  {
+    id: "ch10-auto-reframe",
+    level: "advanced",
+    chapterCode: "CH 10",
+    title: "垂直短影音 Auto Reframe：16:9 轉 9:16 的 AI 追焦與關鍵影格微調",
+    subtitle: "讓 Reels / Shorts 的主體永遠在畫面中央，再手動修掉 AI 的判斷失誤",
+    readTime: "12 min",
+    summary:
+      "把 16:9 的 YouTube 影片直接縮小放進 9:16，畫面會出現兩條巨大黑邊；若整段放大填滿，又會把左右的人物切掉。Auto Reframe 會用 AI 追蹤畫面中的主體，自動產生 Position 關鍵影格，讓人物永遠留在垂直安全框內；你只需要選好構圖範圍，再針對 AI 判斷失誤的片段手動微調。",
+    keyTerms: [
+      { zh: "自動重構圖", en: "Auto Reframe" },
+      { zh: "主體追蹤", en: "Subject Tracking" },
+      { zh: "構圖範圍", en: "Framing: Wide / Medium / Close-Up" },
+      { zh: "手動關鍵影格", en: "Manual Position Keyframes" },
+    ],
+    steps: [
+      {
+        stepTitle: "先建立 9:16 舞台：整條序列重構 vs. 單段素材重構",
+        uiPath: "Sequence → Auto Reframe Sequence (整條) 或 File → New → Sequence (單段)",
+        content:
+          "先決定你要重構的範圍。若你已經有一條剪好的 16:9 時間軸，最快的方法是在 Project 面板選取該 Sequence，執行 Sequence → Auto Reframe Sequence，Aspect Ratio 選 9:16，Pr 會直接產生一條新的垂直序列，原檔完全不動。若你只想處理單一素材，則按 Ctrl/Cmd + N 新建 Sequence，把 Frame Size 設為 1080 x 1920、Timebase 設為 30 fps（動作片可選 60 fps），再把 16:9 素材放進去，準備套用 Auto Reframe 效果。",
+        diagram: `[ 9:16 垂直 Sequence 黃金規格 ]
+• Frame Size    : 1080 x 1920 (9:16)
+• Timebase      : 30 fps (Reels / Shorts) 或 60 fps (高動態)
+• Pixel Aspect  : Square Pixels (1.0)
+• Audio         : 48 kHz / 立體聲
+
+[ 兩種重構範圍 ]
+A. 整條時間軸：Project 選 Sequence ➔ Sequence > Auto Reframe Sequence
+B. 單段素材  ：Ctrl/Cmd + N 建 1080x1920 ➔ 拖入素材 ➔ 套用 Auto Reframe`,
+        winKeys: ["Ctrl", "N"],
+        macKeys: ["Cmd", "N"],
+      },
+      {
+        stepTitle: "讓 AI 追主體：Motion Tracking 與 Framing 的參數怎麼選？",
+        uiPath: "Effects → 搜尋 Auto Reframe → 拖到片段 → Effect Controls",
+        content:
+          "把 Auto Reframe 拖到時間軸上的 16:9 片段，Pr 會開始分析畫面並自動產生追蹤關鍵影格。Effect Controls 中有兩個核心參數：Motion Tracking 決定 AI 多積極地跟著主體移動，人物訪談這類幾乎不動的畫面選 Slower Motion 會最穩；一般 Vlog 用 Default；運動、舞蹈或快速運鏡才選 Faster Motion，否則畫面會一直左右追趕。Framing 則決定裁切後的構圖鬆緊：Wide 保留較多環境、Medium 是人物訪談的安全選擇、Close-Up 會把人物拉得更近。",
+        diagram: `[ Effect Controls > Auto Reframe 參數建議 ]
+• Motion Tracking : Slower Motion  ← 訪談 / 固定機位
+                     Default        ← 一般 Vlog / 生活紀錄
+                     Faster Motion  ← 運動 / 舞蹈 / 快速移動
+
+• Framing         : Wide      (保留環境與左右空間)
+                     Medium    (人物訪談最安全，推薦先試這個)
+                     Close-Up  (主體特寫，適合情感或產品細節)
+
+⚠️ Auto Reframe 不支援靜態圖片；同一條序列也不要重複執行 Auto Reframe Sequence，否則會產生多層巢狀序列。`,
+        winKeys: ["Shift", "5"],
+        macKeys: ["Shift", "5"],
+      },
+      {
+        stepTitle: "AI 修片：用 Position 關鍵影格把主體拉回安全框",
+        uiPath: "Effect Controls → Auto Reframe → Position → 關鍵影格導航",
+        content:
+          "Auto Reframe 會在多個時間點自動打下 Position 關鍵影格，讓主體維持在畫面中央。但遇到兩人同框、主體被遮擋，或 AI 把鏡頭追去背景路人時，還是要手動修。把播放頭移到要修正的影格，在 Effect Controls 展開 Auto Reframe 的 Position，點擊關鍵影格導航箭頭新增或選取該影格，再調整 Position 的 X 數值（1080 寬的序列中央是 540），把人物拉回安全框。若修正後運鏡出現跳動，將該關鍵影格右鍵設為 Ease In / Ease Out，或把前後關鍵格拉開，讓位移過渡更柔和。",
+        diagram: `[ 9:16 安全框：不要把人物放在平台 UI 底下 ]
+┌────────────────┐
+│   ╭────────╮   │  ← 上方留 10~15% 給帳號/標題
+│   │  人物  │   │
+│   │  頭部  │   │  Position X = 540 (水平置中)
+│   ╰────────╯   │
+│                │
+│  字幕 / CTA 區  │  ← 下方留 20% 給字幕與按鈕
+└────────────────┘
+
+[ 手動修正 ]
+00:03 ◆────────◆ 00:07
+       ↑ AI 追到背景路人，將 X 從 612 改回 540
+       ↑ 右鍵設 Ease In / Ease Out，讓修正不突兀`,
+        winKeys: ["Shift", "5"],
+        macKeys: ["Shift", "5"],
+      },
+    ],
+    practiceTask:
+      "找一段 16:9 的人物訪談或 Vlog，先用 Sequence → Auto Reframe Sequence 產生 9:16 版本，Aspect Ratio 選 9:16、Motion Tracking 選 Slower Motion、Framing 選 Medium。播放檢查全片，至少手動修正 3 個 AI 追錯的 Position 關鍵影格，確認人物頭部沒有被平台 UI 遮住，最後輸出一支 15 秒的 Reels / Shorts 測試檔。",
+  },
+];
